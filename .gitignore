@@ -1,0 +1,8 @@
+logs/*
+
+raw_data/*
+!raw_data/.keep
+
+refs/*.fa*
+
+.snakemake*
