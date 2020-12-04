@@ -46,9 +46,9 @@ rule ref_index:
                 config["reference_genome"]
     output:
                 # bwa index
-                expand("refs/hg38.fa.{suffix}", suffix=["amb","ann","bwt","pac","sa"]),
+                expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
                 # samtools index
-                "refs/hg38.fa.fai",
+                expand("{ref}.fai", ref=config["reference_genome"]),
     log:
                 bwa = "logs/ref_index.bwa.log",
                 samtools = "logs/ref_index.bwa.log",
