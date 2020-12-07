@@ -13,7 +13,7 @@ units = pd.read_table(config["units"]).set_index("sample", drop=False)
 rule all:
     input:
                 # ref_index:
-                expand("".join(config["reference_genome"]".{suffix}", suffix=["amb","ann","bwt","pac","sa"])),
+                expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
                 # align
                 expand("analysis/bwa/{units.sample}.nameSorted.bam", units=units.itertuples()),
                 expand("analysis/bwa/{units.sample}.nameSorted.bam.bai", units=units.itertuples()),
