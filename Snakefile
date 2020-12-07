@@ -54,8 +54,8 @@ rule ref_index:
 
 rule align:
     input:
-                R1 = "raw_data/{sample}-R1.fastq",
-                R2 = "raw_data/{sample}-R2.fastq",
+                R1 = "raw_data/{sample}-R1.fastq.gz",
+                R2 = "raw_data/{sample}-R2.fastq.gz",
     params:
                 ref = "refs/hg38.fa",
                 tmp = "tmp"
