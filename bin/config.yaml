@@ -1,2 +1,2 @@
 reference_genome: refs/hg38.fa
-units: units-test.tsv
+units: bin/units.tsv

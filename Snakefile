@@ -6,15 +6,14 @@ from snakemake.utils import validate, min_version
 ### set minimum snakemake version ###
 min_version("5.14.0")
 
-configfile: "config.yaml"
+configfile: "bin/config.yaml"
 
 units = pd.read_table(config["units"]).set_index("sample", drop=False)
 
-print(units)
 rule all:
     input:
                 # ref_index:
-                expand("refs/hg38.fa.{suffix}", suffix=["amb","ann","bwt","pac","sa"]),
+                expand("".join(config["reference_genome"]".{suffix}", suffix=["amb","ann","bwt","pac","sa"])),
                 # align
                 expand("analysis/bwa/{units.sample}.nameSorted.bam", units=units.itertuples()),
                 expand("analysis/bwa/{units.sample}.nameSorted.bam.bai", units=units.itertuples()),
@@ -27,20 +26,6 @@ rule all:
                 # circleMap_realign
                 expand("analysis/circle-map/{units.sample}.circleMap.bed", units=units.itertuples()),
 
-
-# rule download:
-#     output:
-#                 R1 = "raw_data/unknown_circle_reads_1.fastq",
-#                 R2 = "raw_data/unknown_circle_reads_2.fastq",
-#                 hg38 =  "refs/hg38.fa",
-#     shell:
-#         """
-#         wget https://raw.githubusercontent.com/iprada/Circle-Map/master/tutorial/unknown_circle_reads_1.fastq {output.R1}
-#         wget https://raw.githubusercontent.com/iprada/Circle-Map/master/tutorial/unknown_circle_reads_2.fastq {output.R2}
-#         wget http://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz {output.hg38}.gz
-#         gunzip -d {output.hg38}.gz
-#         """
-
 rule ref_index:
     input:
                 config["reference_genome"]
@@ -50,8 +35,8 @@ rule ref_index:
                 # samtools index
                 expand("{ref}.fai", ref=config["reference_genome"]),
     log:
-                bwa = "logs/ref_index.bwa.log",
-                samtools = "logs/ref_index.bwa.log",
+                bwa = expand("logs/ref_index/{ref}.bwa_index.log", ref=config["reference_genome"]),
+                samtools = expand("logs/ref_index/{ref}.samtools_faidx.log", ref=config["reference_genome"]),
     conda:
                 "envs/circle-map.yaml",
     resources:
