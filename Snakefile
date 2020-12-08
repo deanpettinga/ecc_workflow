@@ -54,10 +54,11 @@ rule ref_index:
 
 rule align:
     input:
+                ref = config["reference_genome"],
+                ref_index = expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
                 R1 = "raw_data/{sample}-R1.fastq.gz",
                 R2 = "raw_data/{sample}-R2.fastq.gz",
     params:
-                ref = "refs/hg38.fa",
                 tmp = "tmp"
     output:
                 bam_nameSorted = "analysis/bwa/{sample}.nameSorted.bam",
@@ -78,7 +79,7 @@ rule align:
     shell:
         """
         # align with bwa mem
-        bwa mem -q -t {resources.threads} {params.ref} {input.R1} {input.R2} 2> {log.bwa} |\
+        bwa mem -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} |\
         # pipe sam output to samtools view into bam format
         samtools view -@ {resources.threads} -b - 2> {log.samtools_view} |\
         # nameSort bam
@@ -120,15 +121,14 @@ rule circleMap_readExtractor:
 
 rule circleMap_realign:
     input:
-                    circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
-    params:
-                    ref = "refs/hg38.fa",
+                circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
+                ref = config["reference_genome"],
     output:
-                    "analysis/circle-map/{sample}.circleMap.bed",
+                "analysis/circle-map/{sample}.circleMap.bed",
     log:
-                    "logs/circle-map/circleMap.{sample}.realign.log",
+                "logs/circle-map/circleMap.{sample}.realign.log",
     conda:
-                    "envs/circle-map.yaml"
+                "envs/circle-map.yaml"
     resources:
                 threads = 8,
                 nodes =   1,
@@ -139,7 +139,7 @@ rule circleMap_realign:
         -i sort_circular_read_candidates.bam \
         -qbam qname_unknown_circle.bam \
         -sbam sorted_unknown_circle.bam \
-        -fasta {params.ref} \
+        -fasta {input.ref} \
         -o {output} |
         2> {log}
         """
