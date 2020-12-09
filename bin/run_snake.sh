@@ -1,12 +1,10 @@
 #!/bin/bash
 #SBATCH -J circle
-#SBATCH --partition=savio
-#SBATCH --account=co_rosalind
-#SBATCH --qos=rosalind_savio_normal
+#SBATCH --partition=savio_normal
+#SBATCH --account=fc_kvkallow
+#SBATCH --qos=savio_normal
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
 #SBATCH --time=72:00:00
-#SBATCH --mem=8000
 #SBATCH -o logs/runs/circle.%j.o
 #SBATCH -e logs/runs/circle.%j.e
 #SBATCH --mail-user=pettinga@berkeley.edu
@@ -37,9 +35,8 @@ snakemake \
 --jobs 20 \
 --cluster "sbatch \
   --partition=savio \
-  --account=co_rosalind \
-  --qos=rosalind_savio_normal \
+  --account=fc_kvkallow \
+  --qos=savio_normal \
   --nodes={resources.nodes} \
   --cpus-per-task={threads} \
-  --mem={resources.mem_gb}000 \
   --time=72:00:00" \
