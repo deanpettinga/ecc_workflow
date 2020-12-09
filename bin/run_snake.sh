@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J circle-map
+#SBATCH -J circle
 #SBATCH --partition=savio
 #SBATCH --account=co_rosalind
 #SBATCH --qos=rosalind_savio_normal
@@ -7,8 +7,8 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --time=72:00:00
 #SBATCH --mem=8000
-#SBATCH -o logs/runs/rnaseq-workflow.%j.o
-#SBATCH -e logs/runs/rnaseq-workflow.%j.e
+#SBATCH -o logs/runs/circle.%j.o
+#SBATCH -e logs/runs/circle.%j.e
 #SBATCH --mail-user=pettinga@berkeley.edu
 #SBATCH --mail-type=All
 

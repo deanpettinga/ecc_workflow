@@ -45,17 +45,17 @@ rule ref_index:
                 mem_gb =  64,
     shell:
         """
-        # aligner indexing
-        bwa index {input} 2> {log.bwa}
-
         # Circle-Map indexing
         samtools faidx {input} 2> {log.samtools}
+
+        # aligner indexing
+        bwa index {input} 2> {log.bwa}
         """
 
 rule align:
     input:
                 ref = config["reference_genome"],
-                ref_index = expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
+                ref_index = expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa","fai"]),
                 R1 = "raw_data/{sample}-R1.fastq.gz",
                 R2 = "raw_data/{sample}-R2.fastq.gz",
     params:
