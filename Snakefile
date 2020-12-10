@@ -84,7 +84,7 @@ rule align:
         # align with bwa mem
         bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} |\
         # pipe sam output to samtools view into bam format
-        samtools view -S -b -@ {resources.threads} -o {output.bam} - |\
+        samtools view -S -b -@ {resources.threads} -o {output.bam} - 
         # pipe into nameSort bam
         samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} {output.bam} 2> {log.samtools_sort}
         # index the nameSort
