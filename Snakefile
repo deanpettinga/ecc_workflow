@@ -43,13 +43,13 @@ rule ref_index:
                 nodes =   1,
                 mem_gb =  64,
     shell:
-        """
-        # Circle-Map indexing
-        samtools faidx {input} 2> {log.samtools}
+                """
+                # Circle-Map indexing
+                samtools faidx {input} 2> {log.samtools}
 
-        # aligner indexing
-        bwa index {input} 2> {log.bwa}
-        """
+                # aligner indexing
+                bwa index {input} 2> {log.bwa}
+                """
 
 rule align:
     input:
@@ -78,54 +78,26 @@ rule align:
                 nodes =   1,
                 mem_gb =  64,
     shell:
-        """
-        # align with bwa mem (to SAM)
-        bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
-        # nameSort the BAM
-        samtools sort -T {params.tmp} -O BAM -n -o {output.bam_nameSorted} {output.sam} 2> {log.nameSort}
-        # coordSort the BAM
-        samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
-        # coordSort index
-        samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
-        """
+                """
+                # align with bwa mem (to SAM)
+                bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
+                # nameSort the BAM
+                samtools sort -T {params.tmp} -O BAM -n -o {output.bam_nameSorted} {output.sam} 2> {log.nameSort}
+                # coordSort the BAM
+                samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
+                # coordSort index
+                samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
+                """
 
-rule circleMap_readExtractor:
+rule circleMap_Repeats:
     input:
-                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
-    output:
-                circleMap = "analysis/circle-map/{sample}.circleMapReadExtractor.bam",
-                circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
-                circleMap_coordSorted_bai = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam.bai",
-    log:
-                circleMap = "logs/circleMap_readExtractor/{sample}.circleMap.log",
-                sort = "logs/circleMap_readExtractor/{sample}.circleMap.sort.log",
-    conda:
-                "envs/circle-map.yaml"
-    resources:
-                threads = 8,
-                nodes =   1,
-                mem_gb =  64,
-    shell:
-        """
-        # extract circle reads
-        Circle-Map ReadExtractor -i {input.bam_nameSorted} -o {output.circleMap} 2> {log.circleMap}
-        # sort bam
-        samtools sort -@ {resources.threads} -o {output.circleMap_coordSorted} {output.circleMap} 2> {log.sort}
-        # index coordSorted
-        samtools index {output.circleMap_coordSorted}
-        """
-
-rule circleMap_realign:
-    input:
-                circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
-                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
                 bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
-                ref = config["reference_genome"],
     output:
-                "analysis/circle-map/{sample}.circleMap.bed",
+                "analysis/align/circleMap_Repeats/{sample}.circleMap_Repeats.bed"
     log:
-                "logs/circleMap_realign/{sample}.realign.log",
+                "logs/circleMap_Repeats/{sample}.circleMap_Repeats.log",
+
     conda:
                 "envs/circle-map.yaml"
     resources:
@@ -133,12 +105,32 @@ rule circleMap_realign:
                 nodes =   1,
                 mem_gb =  64,
     shell:
-        """
-        Circle-Map Realign \
-        -i {input.circleMap_coordSorted} \
-        -qbam {input.bam_nameSorted} \
-        -sbam {input.bam_coordSorted} \
-        -fasta {input.ref} \
-        -o {output} |
-        2> {log}
-        """
+                "Circle-Map Repeats -i {input.bam_coordSorted} -o {output} 2> {log}"
+
+# rule circleMap_realign:
+#     input:
+#                 circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
+#                 bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
+#                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
+#                 bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
+#                 ref = config["reference_genome"],
+#     output:
+#                 "analysis/circle-map/{sample}.circleMap.bed",
+#     log:
+#                 "logs/circleMap_realign/{sample}.realign.log",
+#     conda:
+#                 "envs/circle-map.yaml"
+#     resources:
+#                 threads = 8,
+#                 nodes =   1,
+#                 mem_gb =  64,
+#     shell:
+#         """
+#         Circle-Map Realign \
+#         -i {input.circleMap_coordSorted} \
+#         -qbam {input.bam_nameSorted} \
+#         -sbam {input.bam_coordSorted} \
+#         -fasta {input.ref} \
+#         -o {output} |
+#         2> {log}
+#         """
