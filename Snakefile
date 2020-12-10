@@ -79,7 +79,7 @@ rule align:
     shell:
         """
         # align with bwa mem
-        bwa mem -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} |\
+        bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} |\
         # pipe sam output to samtools view into bam format
         samtools view -@ {resources.threads} -b - 2> {log.samtools_view} |\
         # nameSort bam
