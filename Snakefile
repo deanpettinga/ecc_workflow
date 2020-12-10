@@ -67,9 +67,10 @@ rule align:
                 bai_coordSorted = "analysis/bwa/{sample}.coordSorted.bam.bai",
     log:
                 bwa = "logs/bwa/bwa.{sample}.log",
-                samtools_view = "logs/bwa/samtools-view.{sample}.log",
                 samtools_sort = "logs/bwa/samtools-sort.{sample}.log",
                 samtools_index = "logs/bwa/samtools-index.{sample}.log",
+                coordSort_samtools_sort = "logs/bwa/coordSort_samtools-sort.{sample}.log",
+                coordSort_samtools_index = "logs/bwa/coordSort_samtools-index.{sample}.log",
     conda:
                 "envs/circle-map.yaml"
     resources:
@@ -81,16 +82,16 @@ rule align:
         # align with bwa mem
         bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} |\
         # pipe sam output to samtools view into bam format
-        samtools view -@ {resources.threads} -b - 2> {log.samtools_view} |\
-        # nameSort bam
+        samtools view -b -@ {resources.threads} - |\
+        # pipe into nameSort bam
         samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} - 2> {log.samtools_sort}
-        # nameSort bam index
+        # index the nameSort
         samtools index -b -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
 
         # coordSort bam
-        samtools sort -n -T {params.tmp} -o {output.bam_coordSorted} {output.bam_nameSorted}
+        samtools sort -T {params.tmp} -o {output.bam_coordSorted} {output.bam_nameSorted} 2> {log.coordSort_samtools_sort}
         # coordSort bam index
-        samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.samtools_index}
+        samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_samtools_index}
         """
 
 rule circleMap_readExtractor:
