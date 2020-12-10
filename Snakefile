@@ -86,7 +86,7 @@ rule align:
         # nameSort the BAM
         samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} {output.sam} 2> {log.samtools_sort}
         # index the nameSort
-        samtools index -b -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
+        samtools index -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
         """
 
         # # coordSort bam
