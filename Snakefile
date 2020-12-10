@@ -59,18 +59,20 @@ rule align:
                 R1 = "raw_data/{sample}-R1.fastq.gz",
                 R2 = "raw_data/{sample}-R2.fastq.gz",
     params:
-                tmp = "tmp"
+                tmp = "tmp",
+
     output:
+                bam = "analysis/bwa/{sample}.bam",
                 bam_nameSorted = "analysis/bwa/{sample}.nameSorted.bam",
                 bai_nameSorted = "analysis/bwa/{sample}.nameSorted.bam.bai",
                 bam_coordSorted = "analysis/bwa/{sample}.coordSorted.bam",
                 bai_coordSorted = "analysis/bwa/{sample}.coordSorted.bam.bai",
     log:
-                bwa = "logs/bwa/bwa.{sample}.log",
-                samtools_sort = "logs/bwa/samtools-sort.{sample}.log",
-                samtools_index = "logs/bwa/samtools-index.{sample}.log",
-                coordSort_samtools_sort = "logs/bwa/coordSort_samtools-sort.{sample}.log",
-                coordSort_samtools_index = "logs/bwa/coordSort_samtools-index.{sample}.log",
+                bwa = "logs/bwa/{sample}.bwa.log",
+                samtools_sort = "logs/bwa/{sample}.samtools-sort.log",
+                samtools_index = "logs/bwa/{sample}.samtools-index.log",
+                coordSort_samtools_sort = "logs/bwa/{sample}.coordSort_samtools-sort.log",
+                coordSort_samtools_index = "logs/bwa/{sample}.coordSort_samtools-index.log",
     conda:
                 "envs/circle-map.yaml"
     resources:
@@ -82,9 +84,9 @@ rule align:
         # align with bwa mem
         bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} |\
         # pipe sam output to samtools view into bam format
-        samtools view -b -@ {resources.threads} - |\
+        samtools view -S -b -@ {resources.threads} -o {output.bam} - |\
         # pipe into nameSort bam
-        samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} - 2> {log.samtools_sort}
+        samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} {output.bam} 2> {log.samtools_sort}
         # index the nameSort
         samtools index -b -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
 
