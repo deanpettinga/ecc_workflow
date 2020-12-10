@@ -17,8 +17,8 @@ rule all:
                 # align
                 expand("analysis/bwa/{units.sample}.nameSorted.bam", units=units.itertuples()),
                 expand("analysis/bwa/{units.sample}.nameSorted.bam.bai", units=units.itertuples()),
-                expand("analysis/bwa/{units.sample}.coordSorted.bam", units=units.itertuples()),
-                expand("analysis/bwa/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
+                #expand("analysis/bwa/{units.sample}.coordSorted.bam", units=units.itertuples()),
+                #expand("analysis/bwa/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
                 # circleMap_readExtractor
                 expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.bam", units=units.itertuples()),
                 expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam", units=units.itertuples()),
