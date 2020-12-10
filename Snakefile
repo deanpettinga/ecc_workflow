@@ -87,12 +87,12 @@ rule align:
         samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} {output.sam} 2> {log.samtools_sort}
         # index the nameSort
         samtools index -b -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
+        """
 
         # # coordSort bam
         # samtools sort -T {params.tmp} -o {output.bam_coordSorted} {output.bam_nameSorted} 2> {log.coordSort_samtools_sort}
         # # coordSort bam index
         # samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_samtools_index}
-        # """
 
 rule circleMap_readExtractor:
     input:
