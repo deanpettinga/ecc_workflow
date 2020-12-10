@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J circle
-#SBATCH --partition=savio_normal
+#SBATCH --partition=savio
 #SBATCH --account=fc_kvkallow
 #SBATCH --qos=savio_normal
 #SBATCH --nodes=1
