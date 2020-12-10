@@ -62,7 +62,8 @@ rule align:
                 tmp = "tmp",
 
     output:
-                bam = "analysis/bwa/{sample}.bam",
+                sam = temp("analysis/bwa/{sample}.sam"),
+                bam = temp("analysis/bwa/{sample}.bam"),
                 bam_nameSorted = "analysis/bwa/{sample}.nameSorted.bam",
                 bai_nameSorted = "analysis/bwa/{sample}.nameSorted.bam.bai",
                 bam_coordSorted = "analysis/bwa/{sample}.coordSorted.bam",
@@ -81,11 +82,11 @@ rule align:
                 mem_gb =  64,
     shell:
         """
-        # align with bwa mem
-        bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} |\
-        # pipe sam output to samtools view into bam format
-        samtools view -S -b -@ {resources.threads} -o {output.bam} - 
-        # pipe into nameSort bam
+        # align with bwa mem (to SAM)
+        bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
+        # SAM to BAM
+        samtools view -S -b -@ {resources.threads} -o {output.bam} {output.sam}
+        # nameSort the BAM
         samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} {output.bam} 2> {log.samtools_sort}
         # index the nameSort
         samtools index -b -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
