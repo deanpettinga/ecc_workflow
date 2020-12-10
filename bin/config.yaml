@@ -1,2 +1,2 @@
-reference_genome: refs/hg38.fa
+reference_genome: refs/SacCer3.fa
 units: bin/units-test.tsv

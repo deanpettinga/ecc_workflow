@@ -1,2 +1,2 @@
 sample	condition	bio_rep	tech_rep	r1	r2
-unknown	noTreat	1	A	unknown-R1.fastq	unknown-R2.fastq
+repetitive_region	noTreat	1	A	repetitive_region-R1.fastq	repetitive_region-R1.fastq

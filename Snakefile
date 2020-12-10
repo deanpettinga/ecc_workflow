@@ -19,13 +19,7 @@ rule all:
                 expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
                 expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
                 # circleMap_Repeats
-                expand("analysis/align/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
-                # # circleMap_readExtractor
-                # expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.bam", units=units.itertuples()),
-                # expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam", units=units.itertuples()),
-                # expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam.bai", units=units.itertuples()),
-                # # circleMap_realign
-                # expand("analysis/circle-map/{units.sample}.circleMap.bed", units=units.itertuples()),
+                expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
 
 rule ref_index:
     input:
@@ -64,12 +58,10 @@ rule align:
 
     output:
                 sam = temp("analysis/align/{sample}.sam"),
-                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
                 bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
     log:
                 bwa = "logs/align/{sample}.bwa.log",
-                nameSort = "logs/align/{sample}.nameSort.log",
                 coordSort = "logs/align/{sample}.coordSort.log",
                 coordSort_index = "logs/align/{sample}.coordSort_index.log",
 
@@ -83,8 +75,6 @@ rule align:
                 """
                 # align with bwa mem (to SAM)
                 bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
-                # nameSort the BAM
-                samtools sort -T {params.tmp} -O BAM -n -o {output.bam_nameSorted} {output.sam} 2> {log.nameSort}
                 # coordSort the BAM
                 samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
                 # coordSort index
@@ -96,7 +86,7 @@ rule circleMap_Repeats:
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
                 bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
     output:
-                "analysis/align/circleMap_Repeats/{sample}.circleMap_Repeats.bed"
+                "analysis/circleMap_Repeats/{sample}.circleMap_Repeats.bed"
     log:
                 "logs/circleMap_Repeats/{sample}.circleMap_Repeats.log",
 
