@@ -15,7 +15,6 @@ rule all:
                 # ref_index:
                 expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
                 # align
-                expand("analysis/align/{units.sample}.nameSorted.bam", units=units.itertuples()),
                 expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
                 expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
                 # circleMap_Repeats
