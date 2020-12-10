@@ -65,14 +65,14 @@ rule align:
                 sam = temp("analysis/bwa/{sample}.sam"),
                 bam_nameSorted = "analysis/bwa/{sample}.nameSorted.bam",
                 bai_nameSorted = "analysis/bwa/{sample}.nameSorted.bam.bai",
-                bam_coordSorted = "analysis/bwa/{sample}.coordSorted.bam",
-                bai_coordSorted = "analysis/bwa/{sample}.coordSorted.bam.bai",
+                #bam_coordSorted = "analysis/bwa/{sample}.coordSorted.bam",
+                #bai_coordSorted = "analysis/bwa/{sample}.coordSorted.bam.bai",
     log:
                 bwa = "logs/bwa/{sample}.bwa.log",
                 samtools_sort = "logs/bwa/{sample}.samtools-sort.log",
                 samtools_index = "logs/bwa/{sample}.samtools-index.log",
-                coordSort_samtools_sort = "logs/bwa/{sample}.coordSort_samtools-sort.log",
-                coordSort_samtools_index = "logs/bwa/{sample}.coordSort_samtools-index.log",
+                #coordSort_samtools_sort = "logs/bwa/{sample}.coordSort_samtools-sort.log",
+                #coordSort_samtools_index = "logs/bwa/{sample}.coordSort_samtools-index.log",
     conda:
                 "envs/circle-map.yaml"
     resources:
@@ -88,11 +88,11 @@ rule align:
         # index the nameSort
         samtools index -b -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
 
-        # coordSort bam
-        samtools sort -T {params.tmp} -o {output.bam_coordSorted} {output.bam_nameSorted} 2> {log.coordSort_samtools_sort}
-        # coordSort bam index
-        samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_samtools_index}
-        """
+        # # coordSort bam
+        # samtools sort -T {params.tmp} -o {output.bam_coordSorted} {output.bam_nameSorted} 2> {log.coordSort_samtools_sort}
+        # # coordSort bam index
+        # samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_samtools_index}
+        # """
 
 rule circleMap_readExtractor:
     input:
