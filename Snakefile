@@ -18,12 +18,14 @@ rule all:
                 expand("analysis/align/{units.sample}.nameSorted.bam", units=units.itertuples()),
                 expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
                 expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
-                # circleMap_readExtractor
-                expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.bam", units=units.itertuples()),
-                expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam", units=units.itertuples()),
-                expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam.bai", units=units.itertuples()),
-                # circleMap_realign
-                expand("analysis/circle-map/{units.sample}.circleMap.bed", units=units.itertuples()),
+                # circleMap_Repeats
+                expand("analysis/align/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
+                # # circleMap_readExtractor
+                # expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.bam", units=units.itertuples()),
+                # expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam", units=units.itertuples()),
+                # expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam.bai", units=units.itertuples()),
+                # # circleMap_realign
+                # expand("analysis/circle-map/{units.sample}.circleMap.bed", units=units.itertuples()),
 
 rule ref_index:
     input:
