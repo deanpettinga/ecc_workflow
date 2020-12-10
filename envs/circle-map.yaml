@@ -3,5 +3,6 @@ channels:
   - bioconda
 dependencies:
   - circle-map=1.1.4
+  - biopython=1.76
   - bwa=0.7.17
   - samtools=1.11

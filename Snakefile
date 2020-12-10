@@ -97,8 +97,8 @@ rule circleMap_readExtractor:
                 circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
                 circleMap_coordSorted_bai = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam.bai",
     log:
-                circleMap = "logs/circle-map/circleMap.{sample}.log",
-                sort = "logs/circle-map/circleMap.{sample}.sort.log",
+                circleMap = "logs/circleMap_readExtractor/{sample}.circleMap.log",
+                sort = "logs/circleMap_readExtractor/{sample}.circleMap.sort.log",
     conda:
                 "envs/circle-map.yaml"
     resources:
