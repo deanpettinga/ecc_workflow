@@ -15,9 +15,9 @@ rule all:
                 # ref_index:
                 expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
                 # align
-                expand("analysis/bwa/{units.sample}.nameSorted.bam", units=units.itertuples()),
-                expand("analysis/bwa/{units.sample}.coordSorted.bam", units=units.itertuples()),
-                expand("analysis/bwa/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.nameSorted.bam", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
                 # circleMap_readExtractor
                 expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.bam", units=units.itertuples()),
                 expand("analysis/circle-map/{units.sample}.circleMapReadExtractor.coordSorted.bam", units=units.itertuples()),
@@ -61,10 +61,10 @@ rule align:
                 tmp = "tmp",
 
     output:
-                sam = temp("analysis/bwa/{sample}.sam"),
-                bam_nameSorted = "analysis/bwa/{sample}.nameSorted.bam",
-                bam_coordSorted = "analysis/bwa/{sample}.coordSorted.bam",
-                bai_coordSorted = "analysis/bwa/{sample}.coordSorted.bam.bai",
+                sam = temp("analysis/align/{sample}.sam"),
+                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
+                bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
+                bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
     log:
                 bwa = "logs/align/{sample}.bwa.log",
                 nameSort = "logs/align/{sample}.nameSort.log",
@@ -91,7 +91,7 @@ rule align:
 
 rule circleMap_readExtractor:
     input:
-                bam_nameSorted = "analysis/bwa/{sample}.nameSorted.bam",
+                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
     output:
                 circleMap = "analysis/circle-map/{sample}.circleMapReadExtractor.bam",
                 circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
@@ -118,11 +118,14 @@ rule circleMap_readExtractor:
 rule circleMap_realign:
     input:
                 circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
+                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
+                bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
+                bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
                 ref = config["reference_genome"],
     output:
                 "analysis/circle-map/{sample}.circleMap.bed",
     log:
-                "logs/circle-map/circleMap.{sample}.realign.log",
+                "logs/circleMap_realign/{sample}.realign.log",
     conda:
                 "envs/circle-map.yaml"
     resources:
@@ -132,9 +135,9 @@ rule circleMap_realign:
     shell:
         """
         Circle-Map Realign \
-        -i sort_circular_read_candidates.bam \
-        -qbam qname_unknown_circle.bam \
-        -sbam sorted_unknown_circle.bam \
+        -i {input.circleMap_coordSorted} \
+        -qbam {input.bam_nameSorted} \
+        -sbam {input.bam_coordSorted} \
         -fasta {input.ref} \
         -o {output} |
         2> {log}
