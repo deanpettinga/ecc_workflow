@@ -64,15 +64,14 @@ rule align:
     output:
                 sam = temp("analysis/bwa/{sample}.sam"),
                 bam_nameSorted = "analysis/bwa/{sample}.nameSorted.bam",
-                #bai_nameSorted = "analysis/bwa/{sample}.nameSorted.bam.bai",
-                #bam_coordSorted = "analysis/bwa/{sample}.coordSorted.bam",
-                #bai_coordSorted = "analysis/bwa/{sample}.coordSorted.bam.bai",
+                bam_coordSorted = "analysis/bwa/{sample}.coordSorted.bam",
+                bai_coordSorted = "analysis/bwa/{sample}.coordSorted.bam.bai",
     log:
-                bwa = "logs/bwa/{sample}.bwa.log",
-                samtools_sort = "logs/bwa/{sample}.samtools-sort.log",
-                #samtools_index = "logs/bwa/{sample}.samtools-index.log",
-                #coordSort_samtools_sort = "logs/bwa/{sample}.coordSort_samtools-sort.log",
-                #coordSort_samtools_index = "logs/bwa/{sample}.coordSort_samtools-index.log",
+                bwa = "logs/align/{sample}.bwa.log",
+                nameSort = "logs/align/{sample}.nameSort.log",
+                coordSort = "logs/align/{sample}.coordSort.log",
+                coordSort_index = "logs/align/{sample}.coordSort_index.log",
+
     conda:
                 "envs/circle-map.yaml"
     resources:
@@ -84,14 +83,12 @@ rule align:
         # align with bwa mem (to SAM)
         bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
         # nameSort the BAM
-        samtools sort -n -T {params.tmp} -o {output.bam_nameSorted} {output.sam} 2> {log.samtools_sort}
+        samtools sort -T {params.tmp} -O BAM -n -o {output.bam_nameSorted} {output.sam} 2> {log.nameSort}
+        # coordSort the BAM
+        samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
+        # coordSort index
+        samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
         """
-        # # index the nameSort
-        # samtools index -@ {resources.threads} {output.bam_nameSorted} 2> {log.samtools_index}
-        # # coordSort bam
-        # samtools sort -T {params.tmp} -o {output.bam_coordSorted} {output.bam_nameSorted} 2> {log.coordSort_samtools_sort}
-        # # coordSort bam index
-        # samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_samtools_index}
 
 rule circleMap_readExtractor:
     input:
