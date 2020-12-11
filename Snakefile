@@ -46,12 +46,50 @@ rule ref_index:
                 bwa index {input} 2> {log.bwa}
                 """
 
+rule trim_galore:
+    input:
+                R1 = "raw_data/{sample}-R1.fastq.gz",
+                R2 = "raw_data/{sample}-R2.fastq.gz",
+    output:
+                "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
+                "analysis/trim_galore/{sample}-R1_val_1_fastqc.html",
+                "analysis/trim_galore/{sample}-R1_val_1_fastqc.zip",
+                "analysis/trim_galore/{sample}-R1.fastq.gz_trimming_report.txt",
+                "analysis/trim_galore/{sample}-R2_val_2.fq.gz",
+                "analysis/trim_galore/{sample}-R2_val_2_fastqc.html",
+                "analysis/trim_galore/{sample}-R2_val_2_fastqc.zip",
+                "analysis/trim_galore/{sample}-R2.fastq.gz_trimming_report.txt"
+    params:
+                outdir="analysis/trim_galore/"
+    log:
+                stdout="logs/trim_galore/{sample}.o",
+                stderr="logs/trim_galore/{sample}.e"
+    benchmark:
+                "benchmarks/trim_galore/{sample}.txt"
+    conda:
+                "envs/trim-galore.yaml"
+    resources:
+                threads = 4,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                trim_galore \
+                --paired \
+                {input} \
+                --output_dir {params.outdir} \
+                --cores {threads} \
+                -q 20 \
+                --fastqc \
+                2> {log.stderr} 1> {log.stdout}
+                """
+
 rule align:
     input:
                 ref = config["reference_genome"],
                 ref_index = expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa","fai"]),
-                R1 = "raw_data/{sample}-R1.fastq.gz",
-                R2 = "raw_data/{sample}-R2.fastq.gz",
+                R1 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
+                R2 = "analysis/trim_galore/{sample}-R2_val_2.fq.gz",
     params:
                 tmp = "tmp",
 
