@@ -14,9 +14,22 @@ rule all:
     input:
                 # ref_index:
                 expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
+                # trim_galore
+                expand("analysis/trim_galore/{units.sample}-R1_val_1.fq.gz", units=units.itertuples()),
+                expand("analysis/trim_galore/{units.sample}-R1_val_1_fastqc.html", units=units.itertuples()),
+                expand("analysis/trim_galore/{units.sample}-R1_val_1_fastqc.zip", units=units.itertuples()),
+                expand("analysis/trim_galore/{units.sample}-R1.fastq.gz_trimming_report.txt", units=units.itertuples()),
+                expand("analysis/trim_galore/{units.sample}-R2_val_2.fq.gz", units=units.itertuples()),
+                expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.html", units=units.itertuples()),
+                expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.zip", units=units.itertuples()),
+                expand("analysis/trim_galore/{units.sample}-R2.fastq.gz_trimming_report.txt", units=units.itertuples()),
                 # align
                 expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
                 expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
+                # align_stats
+                expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
                 # circleMap_Repeats
                 expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
 
@@ -92,7 +105,6 @@ rule align:
                 R2 = "analysis/trim_galore/{sample}-R2_val_2.fq.gz",
     params:
                 tmp = "tmp",
-
     output:
                 sam = temp("analysis/align/{sample}.sam"),
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
@@ -101,7 +113,6 @@ rule align:
                 bwa = "logs/align/{sample}.bwa.log",
                 coordSort = "logs/align/{sample}.coordSort.log",
                 coordSort_index = "logs/align/{sample}.coordSort_index.log",
-
     conda:
                 "envs/circle-map.yaml"
     resources:
@@ -117,6 +128,27 @@ rule align:
                 # coordSort index
                 samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
                 """
+
+rule align_stats:
+    input:
+                bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
+    output:
+                stats = "analysis/align/{sample}.coordSorted.bam.stats",
+                idxstats = "analysis/align/{sample}.coordSorted.bam.idxstats",
+                flagstat = "analysis/align/{sample}.coordSorted.bam.flagstat",
+    conda:
+                "envs/circle-map.yaml"
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                samtools stats {input.bam_coordSorted} > {output.stats}
+                samtools idxstats {input.bam_coordSorted} > {output.idxstats}
+                samtools flagstat {input.bam_coordSorted} > {output.flagstat}
+                """
+
 
 rule circleMap_Repeats:
     input:
