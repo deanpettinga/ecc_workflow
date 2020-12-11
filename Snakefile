@@ -87,7 +87,7 @@ rule trim_galore:
     benchmark:
                 "benchmarks/trim_galore/{sample}.txt"
     conda:
-                "envs/trim-galore.yaml"
+                "envs/trim_galore.yaml"
     resources:
                 threads = 4,
                 nodes =   1,
