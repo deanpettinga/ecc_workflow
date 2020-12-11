@@ -32,6 +32,13 @@ rule all:
                 expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
                 # circleMap_Repeats
                 expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
+                # multiqc
+                "analysis/multiqc/multiqc_report.html",
+                "analysis/multiqc/multiqc_report_data/multiqc.log",
+                "analysis/multiqc/multiqc_report_data/multiqc_cutadapt.txt",
+                "analysis/multiqc/multiqc_report_data/multiqc_fastqc.txt",
+                "analysis/multiqc/multiqc_report_data/multiqc_general_stats.txt",
+                "analysis/multiqc/multiqc_report_data/multiqc_sources.txt",
 
 rule ref_index:
     input:
@@ -149,7 +156,6 @@ rule align_stats:
                 samtools flagstat {input.bam_coordSorted} > {output.flagstat}
                 """
 
-
 rule circleMap_Repeats:
     input:
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
@@ -168,30 +174,39 @@ rule circleMap_Repeats:
     shell:
                 "Circle-Map Repeats -i {input.bam_coordSorted} -o {output} 2> {log}"
 
-# rule circleMap_realign:
-#     input:
-#                 circleMap_coordSorted = "analysis/circle-map/{sample}.circleMapReadExtractor.coordSorted.bam",
-#                 bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
-#                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
-#                 bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
-#                 ref = config["reference_genome"],
-#     output:
-#                 "analysis/circle-map/{sample}.circleMap.bed",
-#     log:
-#                 "logs/circleMap_realign/{sample}.realign.log",
-#     conda:
-#                 "envs/circle-map.yaml"
-#     resources:
-#                 threads = 8,
-#                 nodes =   1,
-#                 mem_gb =  64,
-#     shell:
-#         """
-#         Circle-Map Realign \
-#         -i {input.circleMap_coordSorted} \
-#         -qbam {input.bam_nameSorted} \
-#         -sbam {input.bam_coordSorted} \
-#         -fasta {input.ref} \
-#         -o {output} |
-#         2> {log}
-#         """
+rule multiqc:
+        input:
+                    # trim_galore
+                    expand("analysis/trim_galore/{units.sample}-R1_val_1_fastqc.html", units=units.itertuples()),
+                    expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.html", units=units.itertuples()),
+                    expand("analysis/trim_galore/{units.sample}-R1.fastq.gz_trimming_report.txt", units=units.itertuples()),
+                    expand("analysis/trim_galore/{units.sample}-R2.fastq.gz_trimming_report.txt", units=units.itertuples()),
+                    # align_stats
+                    expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
+                    expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
+                    expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
+        params:
+                    "analysis/align/",
+                    "analysis/trim_galore/",
+        output:
+                    "analysis/multiqc/multiqc_report.html",
+                    "analysis/multiqc/multiqc_report_data/multiqc.log",
+                    "analysis/multiqc/multiqc_report_data/multiqc_cutadapt.txt",
+                    "analysis/multiqc/multiqc_report_data/multiqc_fastqc.txt",
+                    "analysis/multiqc/multiqc_report_data/multiqc_general_stats.txt",
+                    "analysis/multiqc/multiqc_report_data/multiqc_sources.txt",
+        log:
+                    "logs/multiqc/multiqc.log",
+        conda:
+                    "envs/multiqc.yaml"
+        resources:
+                    threads = 1,
+                    nodes =   1,
+                    mem_gb =  64,
+        shell:
+                    """
+                    multiqc -f {params} \
+                    -o analysis/multiqc \
+                    -n multiqc_report.html \
+                    2> {log}
+                    """
