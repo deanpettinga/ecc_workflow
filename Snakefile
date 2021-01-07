@@ -28,7 +28,7 @@ rule all:
                 # expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
                 # align magnaporthe
                 expand("analysis/align/{units.sample}.coordSorted.magna.bam", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.bam.magna.bai", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.magna.bam.bai", units=units.itertuples()),
                 # # align_stats
                 # expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
