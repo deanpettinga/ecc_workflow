@@ -304,7 +304,7 @@ rule align_magna_stats:
 # make a PCA from the alignments
 rule plotPCA:
     input:
-                bam = "analysis/align/{sample}.coordSorted.bam",
+                bam = expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
     output:
                 multiBamSummary = "analysis/deeptools/multiBamSummary.npz",
                 pca = "analysis/deeptools/multiBamSummary.pca.png",
