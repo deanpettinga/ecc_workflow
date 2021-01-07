@@ -141,38 +141,6 @@ rule align:
                 samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
                 """
 
-rule align_magna:
-    input:
-                ref = 'refs/Magnaporthe_oryzae.MG8.dna_sm.toplevel.fa',
-                ref_index = expand("refs/Magnaporthe_oryzae.MG8.dna_sm.toplevel.fa.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa","fai"]),
-                R1 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
-                R2 = "analysis/trim_galore/{sample}-R2_val_2.fq.gz",
-    params:
-                tmp = "tmp",
-    output:
-                sam = temp("analysis/align/{sample}.sam.magna"),
-                bam_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam",
-                bai_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam.bai",
-    log:
-                bwa = "logs/align/{sample}.bwa.magna.log",
-                coordSort = "logs/align/{sample}.coordSort.magna.log",
-                coordSort_index = "logs/align/{sample}.coordSort_index.magna.log",
-    conda:
-                "envs/circle-map.yaml"
-    resources:
-                threads = 8,
-                nodes =   1,
-                mem_gb =  64,
-    shell:
-                """
-                # align with bwa mem (to SAM)
-                bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
-                # coordSort the BAM
-                samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
-                # coordSort index
-                samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
-                """
-
 rule align_stats:
     input:
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
@@ -269,3 +237,72 @@ rule multiqc:
                     -n multiqc_report.html \
                     2> {log}
                     """
+
+
+# QC for suspected contamination
+
+# align to magnaporthae to see if it is the source of contamination
+rule align_magna:
+    input:
+                ref = 'refs/Magnaporthe_oryzae.MG8.dna_sm.toplevel.fa',
+                ref_index = expand("refs/Magnaporthe_oryzae.MG8.dna_sm.toplevel.fa.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa","fai"]),
+                R1 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
+                R2 = "analysis/trim_galore/{sample}-R2_val_2.fq.gz",
+    params:
+                tmp = "tmp",
+    output:
+                sam = temp("analysis/align/{sample}.sam.magna"),
+                bam_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam",
+                bai_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam.bai",
+    log:
+                bwa = "logs/align/{sample}.bwa.magna.log",
+                coordSort = "logs/align/{sample}.coordSort.magna.log",
+                coordSort_index = "logs/align/{sample}.coordSort_index.magna.log",
+    conda:
+                "envs/circle-map.yaml"
+    resources:
+                threads = 8,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                # align with bwa mem (to SAM)
+                bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
+                # coordSort the BAM
+                samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
+                # coordSort index
+                samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
+                """
+
+rule align_magna_stats:
+    input:
+                bam_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam",
+    output:
+                stats = "analysis/align/{sample}.coordSorted.magna.bam.stats",
+                idxstats = "analysis/align/{sample}.coordSorted.magna.bam.idxstats",
+                flagstat = "analysis/align/{sample}.coordSorted.magna.bam.flagstat",
+    conda:
+                "envs/circle-map.yaml"
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                samtools stats {input.bam_coordSorted} > {output.stats}
+                samtools idxstats {input.bam_coordSorted} > {output.idxstats}
+                samtools flagstat {input.bam_coordSorted} > {output.flagstat}
+                """
+
+rule align_pca:
+    input:
+
+    shell:
+                """
+                # compute read coverage for full genome
+                multiBamSummary bins -p {resources.threads} \
+                --bamfiles {input.bam} \
+                --smartLabels \
+                --outFileName {output} \
+
+                """
