@@ -1,0 +1,148 @@
+---
+title: "eccDNA Analysis"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+params:
+  rmd: ""
+output:
+  html_document:
+    dev: png
+    code_folding: hide
+    self_contained: yes
+    toc: true
+    toc_depth: 5
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    number_sections: true
+    df_print: paged
+---
+
+```{r setup}
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	cache = TRUE)
+```
+
+```{r}
+library(ggridges)
+library(tidyverse)
+library(vroom)
+library(GenomicRanges)
+```
+# NOTES
+  1. Normalize eccDNA counts by library size of aligned reads for relative eccDNA comparisons (use samtools stats/idxstats/flagstat)
+  2. look at preferential eccDNA creating loci? do they differ between treatments?
+  3. Motif Analysis
+    a. make list of ORI sequences to test for enrichment.
+      - jaspar database
+    b. use MEME for *de novo* detection of ungapped motifs.
+      - 
+      - GLAM2 to find novel, gapped motifs in DNA sequences, then find BLAST hits for 
+      - 
+
+
+# Experimental Design
+
+```{r}
+meta <- vroom("../../bin/units.tsv")
+```
+
+```{r}
+circles <- NULL
+
+# import bed for each sample in meta
+for (i in 1:nrow(meta)){
+   circles.i <- vroom(paste0("../circleMap_Repeats/",meta$sample[i],".circleMap_Repeats.bed"),
+                   # information on columns here:
+                   #https://github.com/iprada/Circle-Map/wiki/Circle-Map-Realign-output-files
+                   col_names = c("chromosome","start_coord","end_coord","discordants","split_reads","circle_score","coverage_mean","coverage_sd","coverage_increase_start_coord","coverage_increase_end_coord","coverage_continuity"))
+   # add some tidy annotations
+   circles.i$sample <- meta$sample[i]
+   circles.i$condition <- meta$condition[i]
+   circles.i$bio_rep <- meta$bio_rep[i]
+   circles.i$tech_rep <- meta$tech_rep[i]
+   #add to dataframe
+   circles <- rbind(circles,circles.i)
+}
+
+```
+
+# Filtering
+Following circle-map guidelines on the wiki here: https://github.com/iprada/Circle-Map/wiki/Circle-Map-Realign-output-files
+```{r}
+nrow(circles)
+
+circles.trim <- circles %>%
+  dplyr::filter(circle_score > 50) %>%
+  dplyr::mutate(length = end_coord-start_coord)
+
+circles.trim$length
+```
+
+
+```{r}
+ggplot(circles, aes(x=end_coord-start_coord, y=sample, fill = as.factor(condition))) +
+  geom_density_ridges_gradient(scale = 1, size = 0.5, rel_min_height = 0.01)
+
+ggplot(circles.trim, aes(x=end_coord-start_coord, y=sample, fill = as.factor(condition))) +
+  geom_density_ridges_gradient(scale = 1, size = 0.5, rel_min_height = 0.01)
+
+ggplot(circles.trim, aes(x=end_coord-start_coord, fill = as.factor(condition))) +
+  geom_histogram() +
+  facet_grid(rows = vars(as.factor(condition)))
+
+ggplot(circles, aes(y=end_coord-start_coord, x=as.factor(condition), fill = as.factor(condition))) +
+  geom_violin() + 
+  geom_jitter(alpha=0.3) +
+  ylim(c(0,200000))
+
+ggplot(circles.trim, aes(y=length, x=as.factor(condition), fill = as.factor(condition))) +
+  geom_violin() + 
+  geom_jitter(alpha=0.3) +
+  ylim(c(0,200000))
+
+
+
+circles.trim %>% 
+  dplyr::filter(condition=="inoculated")
+
+circles.trim %>% 
+  dplyr::filter(condition=="control")
+```
+
+```{r}
+
+circles.forGR <- circles %>% dplyr::filter(!is.na(chromosome))
+
+circles.GR <- GRanges(seqnames = circles.forGR$chromosome,
+                      ranges = paste0(circles.forGR$start_coord,"-",circles.forGR$end_coord),
+                      condition = circles.forGR$condition,
+                      bio_rep = circles.forGR$bio_rep,
+                      tech_rep = circles.forGR$tech_rep,
+                      discordants = circles.forGR$discordants,
+                      split_reads = circles.forGR$split_reads,
+                      circle_score = circles.forGR$circle_score,
+                      coverage_mean = circles.forGR$coverage_mean,
+                      coverage_sd = circles.forGR$coverage_sd,
+                      coverage_increase_start_coord = circles.forGR$coverage_increase_start_coord,
+                      coverage_increase_end_coord = circles.forGR$coverage_increase_end_coord,
+                      coverage_continuity = circles.forGR$coverage_continuity)
+
+
+head(circles.GR[(elementMetadata(circles.GR)[,"bio_rep"] == "RC_2")],n=6)
+head(circles.GR[(elementMetadata(circles.GR)[,"bio_rep"] == "RC_1")],n=20)
+
+subsetByOverlaps(head(circles.GR[(elementMetadata(circles.GR)[,"bio_rep"] == "RC_2")],n=6),
+                 head(circles.GR[(elementMetadata(circles.GR)[,"bio_rep"] == "RC_1")],n=20)
+)
+
+
+subsetByOverlaps(circles.GR[(elementMetadata(circles.GR)[,"bio_rep"] == "RC_1")],
+                 circles.GR[(elementMetadata(circles.GR)[,"bio_rep"] == "RC_2")])
+
+ggplot(circles, aes(x= as.factor(chromosome), color = as.factor(bio_rep))) +
+  geom_jitter(stat="count", position = "dodge")
+```

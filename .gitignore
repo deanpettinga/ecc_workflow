@@ -1,11 +1,19 @@
-analysis/*
-!analysis/R/
+
+analysis/align
+analysis/blast
+analysis/circleMap_Repeats
+analysis/multiqc
+analysis/R/eccDNA-analysis.html
+analysis/R/eccDNA-analysis_cache*
+analysis/R/eccDNA-analysis_files*
+
+circle-map_realign*
 
 logs/*
 
 raw_data/*
 !raw_data/.keep
 
-refs/*.fa*
+refs/*
 
 .snakemake*
