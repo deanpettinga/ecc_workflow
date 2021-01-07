@@ -26,9 +26,6 @@ rule all:
                 # # align
                 # expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
-                # align magnaporthe
-                expand("analysis/align/{units.sample}.coordSorted.magna.bam", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.magna.bam.bai", units=units.itertuples()),
                 # # align_stats
                 # expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
@@ -44,6 +41,15 @@ rule all:
                 # "analysis/multiqc/multiqc_report_data/multiqc_fastqc.txt",
                 # "analysis/multiqc/multiqc_report_data/multiqc_general_stats.txt",
                 # "analysis/multiqc/multiqc_report_data/multiqc_sources.txt",
+                # QC
+                # align magnaporthe
+                expand("analysis/align/{units.sample}.coordSorted.magna.bam", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.magna.bam.bai", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.magna.bam.stats", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.magna.bam.idxstats", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.magna.bam.flagstat", units=units.itertuples()),
+                # plotPCA
+                "analysis/deeptools/multiBamSummary.pca.png",
 
 rule ref_index:
     input:
@@ -294,15 +300,29 @@ rule align_magna_stats:
                 samtools flagstat {input.bam_coordSorted} > {output.flagstat}
                 """
 
-rule align_pca:
-    input:
 
+# make a PCA from the alignments
+rule plotPCA:
+    input:
+                bam = "analysis/align/{sample}.coordSorted.bam",
+    output:
+                multiBamSummary = "analysis/deeptools/multiBamSummary.npz",
+                pca = "analysis/deeptools/multiBamSummary.pca.png",
+    conda:
+                "envs/deeptools.yaml"
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
     shell:
                 """
                 # compute read coverage for full genome
                 multiBamSummary bins -p {resources.threads} \
                 --bamfiles {input.bam} \
                 --smartLabels \
-                --outFileName {output} \
+                --outFileName {output}
 
+                plotPCA -in {output.multiBamSummary} \
+                -o {output.pca} \
+                -T "PCA of read counts"
                 """
