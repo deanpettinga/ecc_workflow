@@ -1,2 +1,2 @@
-reference_genome: refs/Oryza_sativa.IRGSP-1.0.dna.fa
+reference_genome: refs/Oryza_sativa.IRGSP-1.0.dna_sm.toplevel.fa
 units: bin/units.tsv
