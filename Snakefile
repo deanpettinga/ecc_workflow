@@ -308,10 +308,12 @@ rule plotPCA:
     output:
                 multiBamSummary = "analysis/deeptools/multiBamSummary.npz",
                 pca = "analysis/deeptools/multiBamSummary.pca.png",
+    log:
+                "logs/plotPCA.log"
     conda:
                 "envs/deeptools.yaml"
     resources:
-                threads = 1,
+                threads = 8,
                 nodes =   1,
                 mem_gb =  64,
     shell:
@@ -320,9 +322,11 @@ rule plotPCA:
                 multiBamSummary bins -p {resources.threads} \
                 --bamfiles {input.bam} \
                 --smartLabels \
-                --outFileName {output}
+                --outFileName {output} \
+                2> {log}
 
                 plotPCA -in {output.multiBamSummary} \
                 -o {output.pca} \
-                -T "PCA of read counts"
+                -T "PCA of read counts" \
+                2>> {log}
                 """
