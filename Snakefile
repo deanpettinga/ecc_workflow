@@ -318,11 +318,13 @@ rule plotPCA:
                 mem_gb =  64,
     shell:
                 """
+                # make output dir if it doesnt exist
+                mkdir -p analysis/deeptools
                 # compute read coverage for full genome
                 multiBamSummary bins -p {resources.threads} \
                 --bamfiles {input.bam} \
                 --smartLabels \
-                --outFileName {output} \
+                --outFileName {output.multiBamSummary} \
                 2> {log}
 
                 plotPCA -in {output.multiBamSummary} \
