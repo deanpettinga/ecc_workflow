@@ -1,12 +1,13 @@
 
 analysis/align
 analysis/blast
+analysis/deeptools/*
 analysis/circleMap_Repeats
 analysis/multiqc
 analysis/R/eccDNA-analysis.html
 analysis/R/eccDNA-analysis_cache*
 analysis/R/eccDNA-analysis_files*
-
+analysis/R/.R*
 circle-map_realign*
 
 logs/*
