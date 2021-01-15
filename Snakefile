@@ -38,7 +38,7 @@ rule all:
                 expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam", units=units.itertuples()),
                 expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam.bai", units=units.itertuples()),
                 # circleMap_Realign
-                expand("analysis/circleMap_Realign/{units.sample}.circles.bam", units=units.itertuples()),
+                expand("analysis/circleMap_Realign/{units.sample}.circles.bed", units=units.itertuples()),
                 # getfasta
                 # expand("analysis/R/circles.collapsed.{condition}.fa", condition=["IF","RC"]),
                 # multiqc
@@ -143,7 +143,7 @@ rule align:
     conda:
                 "envs/circle-map.yaml"
     resources:
-                threads = 8,
+                threads = 20,
                 nodes =   1,
                 mem_gb =  64,
     shell:
@@ -167,7 +167,7 @@ rule nameSort_align:
     conda:
                 "envs/circle-map.yaml"
     resources:
-                threads = 8,
+                threads = 20,
                 nodes =   1,
                 mem_gb =  64,
     shell:
@@ -223,7 +223,7 @@ rule circleMap_ReadExtractor:
     conda:
                 "envs/circle-map.yaml"
     resources:
-                threads = 8,
+                threads = 20,
                 nodes =   1,
                 mem_gb =  64,
     shell:
@@ -241,13 +241,13 @@ rule circleMap_Realign:
                 ref = config["reference_genome"],
                 ref_index = expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa","fai"]),
     output:
-                "analysis/circleMap_Realign/{sample}.circles.bam"
+                "analysis/circleMap_Realign/{sample}.circles.bed"
     log:
                 "logs/circleMap_Realign/{sample}.circleMap_Realign.log"
     conda:
                 "envs/circle-map.yaml"
     resources:
-                threads = 8,
+                threads = 20,
                 nodes =   1,
                 mem_gb =  64,
     shell:
