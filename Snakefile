@@ -132,12 +132,12 @@ rule align:
                 tmp = "tmp",
     output:
                 sam = temp("analysis/align/{sample}.sam"),
-                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
+                #bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
                 bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
     log:
                 bwa = "logs/align/{sample}.bwa.log",
-                nameSort = "logs/align/{sample}.nameSort.log",
+                #nameSort = "logs/align/{sample}.nameSort.log",
                 coordSort = "logs/align/{sample}.coordSort.log",
                 coordSort_index = "logs/align/{sample}.coordSort_index.log",
     conda:
@@ -150,13 +150,29 @@ rule align:
                 """
                 # align with bwa mem (to SAM)
                 bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
-                # nameSort
-                samtools sort -@ {resources.threads} -n -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.nameSort}
                 # coordSort
                 samtools sort -@ {resources.threads} -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
                 # coordSort index
                 samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
                 """
+rule nameSort_align:
+    input:
+                "analysis/align/{sample}.coordSorted.bam",
+    params:
+                tmp = "tmp",
+    output:
+                "analysis/align/{sample}.nameSorted.bam",
+    log:
+                "logs/align/{sample}.nameSort.log",
+    conda:
+                "envs/circle-map.yaml"
+    resources:
+                threads = 8,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                "samtools sort -@ {resources.threads} -n -T {params.tmp} -O BAM -o {output} {input} 2> {log}"
+
 
 rule align_stats:
     input:
