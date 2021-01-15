@@ -259,7 +259,7 @@ rule circleMap_Realign:
                 -sbam {input.BWA_coordSorted} \
                 -fasta {input.ref} \
                 -o {output} \
-                2> {log}
+                &> {log}
                 """
 
 rule eccDNA_analysis_R:
