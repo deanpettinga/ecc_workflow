@@ -4,6 +4,8 @@ analysis/blast
 analysis/deeptools/*
 analysis/circleMap_Repeats
 analysis/multiqc
+
+analysis/R/circles.collapsed.*
 analysis/R/eccDNA-analysis.html
 analysis/R/eccDNA-analysis_cache*
 analysis/R/eccDNA-analysis_files*

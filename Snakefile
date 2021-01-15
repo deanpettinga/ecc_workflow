@@ -24,16 +24,23 @@ rule all:
                 # expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.zip", units=units.itertuples()),
                 # expand("analysis/trim_galore/{units.sample}-R2.fastq.gz_trimming_report.txt", units=units.itertuples()),
                 # # align
-                # expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
-                # expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.nameSorted.bam", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
                 # # align_stats
-                # expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
-                # expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
-                # expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
+                expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
                 # # circleMap_Repeats
                 # expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
+                # circleMap_ReadExtractor
+                expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.unsorted.bam", units=units.itertuples()),
+                expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam", units=units.itertuples()),
+                expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam.bai", units=units.itertuples()),
+                # circleMap_Realign
+                expand("analysis/circleMap_Realign/{units.sample}.circles.bam", units=units.itertuples()),
                 # getfasta
-                expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.fa", units=units.itertuples()),
+                # expand("analysis/R/circles.collapsed.{condition}.fa", condition=["IF","RC"]),
                 # multiqc
                 # "analysis/multiqc/multiqc_report.html",
                 # "analysis/multiqc/multiqc_report_data/multiqc.log",
@@ -42,14 +49,14 @@ rule all:
                 # "analysis/multiqc/multiqc_report_data/multiqc_general_stats.txt",
                 # "analysis/multiqc/multiqc_report_data/multiqc_sources.txt",
                 # QC
-                # align magnaporthe
-                expand("analysis/align/{units.sample}.coordSorted.magna.bam", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.magna.bam.bai", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.magna.bam.stats", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.magna.bam.idxstats", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.magna.bam.flagstat", units=units.itertuples()),
+                # # align magnaporthe
+                # expand("analysis/align/{units.sample}.coordSorted.magna.bam", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.magna.bam.bai", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.magna.bam.stats", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.magna.bam.idxstats", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.magna.bam.flagstat", units=units.itertuples()),
                 # plotPCA
-                "analysis/deeptools/multiBamSummary.pca.png",
+                # "analysis/deeptools/multiBamSummary.pca.png",
 
 rule ref_index:
     input:
@@ -125,10 +132,12 @@ rule align:
                 tmp = "tmp",
     output:
                 sam = temp("analysis/align/{sample}.sam"),
+                bam_nameSorted = "analysis/align/{sample}.nameSorted.bam",
                 bam_coordSorted = "analysis/align/{sample}.coordSorted.bam",
                 bai_coordSorted = "analysis/align/{sample}.coordSorted.bam.bai",
     log:
                 bwa = "logs/align/{sample}.bwa.log",
+                nameSort = "logs/align/{sample}.nameSort.log",
                 coordSort = "logs/align/{sample}.coordSort.log",
                 coordSort_index = "logs/align/{sample}.coordSort_index.log",
     conda:
@@ -141,8 +150,10 @@ rule align:
                 """
                 # align with bwa mem (to SAM)
                 bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
-                # coordSort the BAM
-                samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
+                # nameSort
+                samtools sort -@ {resources.threads} -n -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.nameSort}
+                # coordSort
+                samtools sort -@ {resources.threads} -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
                 # coordSort index
                 samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
                 """
@@ -184,24 +195,97 @@ rule align_stats:
 #     shell:
 #                 "Circle-Map Repeats -i {input.bam_coordSorted} -o {output} 2> {log}"
 
-rule getfasta:
+rule circleMap_ReadExtractor:
     input:
-                bed = "analysis/circleMap_Repeats/{sample}.circleMap_Repeats.bed",
-                ref = config["reference_genome"],
+                nameSorted_bam = "analysis/align/{sample}.nameSorted.bam",
     output:
-                fa = "analysis/circleMap_Repeats/{sample}.circleMap_Repeats.fa",
+                unsorted = "analysis/circleMap_Realign/{sample}.circular_read_candidates.unsorted.bam",
+                coordSorted = "analysis/circleMap_Realign/{sample}.circular_read_candidates.coordSorted.bam",
+                coordSorted_bai = "analysis/circleMap_Realign/{sample}.circular_read_candidates.coordSorted.bam.bai"
     log:
-                "logs/getfasta/{sample}.getfasta.log"
+                "logs/circleMap_Realign/{sample}.circleMap_ReadExtractor.log",
     conda:
-                "envs/bedtools.yaml"
+                "envs/circle-map.yaml"
     resources:
                 threads = 8,
                 nodes =   1,
                 mem_gb =  64,
     shell:
                 """
+                Circle-Map ReadExtractor -i {input.nameSorted_bam} -o {output.unsorted} 2> {log}
+                samtools sort -@ {resources.threads} -o {output.coordSorted} {output.unsorted} 2>> {log}
+                samtools index {output.coordSorted}
+                """
+
+rule circleMap_Realign:
+    input:
+                circleCand_coordSorted = "analysis/circleMap_Realign/{sample}.circular_read_candidates.coordSorted.bam",
+                BWA_nameSorted = "analysis/align/{sample}.nameSorted.bam",
+                BWA_coordSorted = "analysis/align/{sample}.coordSorted.bam",
+                ref = config["reference_genome"],
+                ref_index = expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa","fai"]),
+    output:
+                "analysis/circleMap_Realign/{sample}.circles.bam"
+    log:
+                "logs/circleMap_Realign/{sample}.circleMap_Realign.log"
+    conda:
+                "envs/circle-map.yaml"
+    resources:
+                threads = 8,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                Circle-Map Realign \
+                -t {resources.threads} \
+                -i {input.circleCand_coordSorted} \
+                -qbam {input.BWA_nameSorted} \
+                -sbam {input.BWA_coordSorted} \
+                -fasta {input.ref} \
+                -o {output} \
+                2> {log}
+                """
+
+rule eccDNA_analysis_R:
+    input:
+                expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
+    params:
+                Rmd = "analysis/R/eccDNA-analysis.Rmd"
+    output:
+                "analysis/R/eccDNA-analysis.html",
+                expand("analysis/R/circles.collapsed.{condition}.bed", condition=["RC","IF"]),
+    log:
+                "logs/R/eccDNA-analysis-R.log"
+    conda:
+                "envs/r.yaml"
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                Rscript -e "rmarkdown::render('{params.Rmd}',output_format='html_document')"
+                """
+
+rule circles_getfasta:
+    input:
+                bed = "analysis/R/circles.collapsed.{condition}.bed"
+    params:
+                ref = config["reference_genome"],
+    output:
+                fa = "analysis/R/circles.collapsed.{condition}.fa",
+    log:
+                "logs/getfasta/{condition}.getfasta.log"
+    conda:
+                "envs/bedtools.yaml"
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
                 bedtools getfasta \
-                -fi {input.ref} \
+                -fi {params.ref} \
                 -bed {input.bed} \
                 -fo {output.fa} \
                 2> {log}
