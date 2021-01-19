@@ -24,21 +24,21 @@ rule all:
                 # expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.zip", units=units.itertuples()),
                 # expand("analysis/trim_galore/{units.sample}-R2.fastq.gz_trimming_report.txt", units=units.itertuples()),
                 # # align
-                expand("analysis/align/{units.sample}.nameSorted.bam", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
-                # # align_stats
-                expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
-                expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.nameSorted.bam", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
+                # # # align_stats
+                # expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
+                # expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
                 # # circleMap_Repeats
                 # expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
                 # circleMap_ReadExtractor
-                expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.unsorted.bam", units=units.itertuples()),
-                expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam", units=units.itertuples()),
-                expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam.bai", units=units.itertuples()),
+                # expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.unsorted.bam", units=units.itertuples()),
+                # expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam", units=units.itertuples()),
+                # expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam.bai", units=units.itertuples()),
                 # circleMap_Realign
-                expand("analysis/circleMap_Realign/{units.sample}.circles.bed", units=units.itertuples()),
+                # expand("analysis/circleMap_Realign/{units.sample}.circles.bed", units=units.itertuples()),
                 # getfasta
                 # expand("analysis/R/circles.collapsed.{condition}.fa", condition=["IF","RC"]),
                 # multiqc
