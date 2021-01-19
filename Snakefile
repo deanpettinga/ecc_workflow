@@ -60,7 +60,7 @@ rule all:
                 # ecc_caller_createMapfile
                 "analysis/ecc_caller/mapfile",
                 # ecc_caller_callEccDNAs
-                "test_output.txt",
+                "test-output.txt",
 
 rule ref_index:
     input:
