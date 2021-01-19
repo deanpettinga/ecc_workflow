@@ -59,6 +59,8 @@ rule all:
                 # "analysis/deeptools/multiBamSummary.pca.png",
                 # ecc_caller_createMapfile
                 "analysis/ecc_caller/mapfile",
+                # ecc_caller_callEccDNAs
+                "test_output.txt",
 
 rule ref_index:
     input:
@@ -435,7 +437,6 @@ rule plotPCA:
                 2>> {log}
                 """
 
-
 rule ecc_caller_createMapfile:
     input:
                 config["reference_genome"],
@@ -461,7 +462,7 @@ rule ecc_caller_callEccDNAs:
     params:
                 outname = "analysis/ecc_caller/alignments/{sample}",
     output:
-                
+                "test-output.txt"
     log:
                 "logs/ecc_caller/createMapfile.log",
     conda:
@@ -472,8 +473,8 @@ rule ecc_caller_callEccDNAs:
                 mem_gb =  64,
     shell:
                 """
-                generate_bam_file.sh \
-                -g genome_bwa \
+                envs/ecc_caller/generate_bam_file.sh \
+                -g {input.ref} \
                 -1 {input.R1} \
                 -2 {input.R2} \
                 -s {params.outname} \
