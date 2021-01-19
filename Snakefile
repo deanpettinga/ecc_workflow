@@ -57,6 +57,8 @@ rule all:
                 # expand("analysis/align/{units.sample}.coordSorted.magna.bam.flagstat", units=units.itertuples()),
                 # plotPCA
                 # "analysis/deeptools/multiBamSummary.pca.png",
+                # ecc_caller_createMapfile
+                "analysis/ecc_caller/mapfile",
 
 rule ref_index:
     input:
@@ -431,4 +433,50 @@ rule plotPCA:
                 -o {output.pca} \
                 -T "PCA of read counts" \
                 2>> {log}
+                """
+
+
+rule ecc_caller_createMapfile:
+    input:
+                config["reference_genome"],
+    output:
+                "analysis/ecc_caller/mapfile",
+    log:
+                "logs/ecc_caller/createMapfile.log",
+    conda:
+                "envs/ecc_caller.yaml",
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                "grep '>' {input} | awk '{{print substr($1,2)}}' 1> {output} 2> {log}"
+
+rule ecc_caller_callEccDNAs:
+    input:
+                ref = config["reference_genome"],
+                mapfile = "analysis/ecc_caller/mapfile",
+                R1 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
+                R2 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
+    params:
+                outname = "analysis/ecc_caller/alignments/{sample}",
+    output:
+                
+    log:
+                "logs/ecc_caller/createMapfile.log",
+    conda:
+                "envs/ecc_caller.yaml",
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                generate_bam_file.sh \
+                -g genome_bwa \
+                -1 {input.R1} \
+                -2 {input.R2} \
+                -s {params.outname} \
+                -t {resources.threads} \
+                -m {input.mapfile}
                 """
