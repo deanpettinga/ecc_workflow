@@ -60,7 +60,7 @@ rule all:
                 # ecc_caller_createMapfile
                 "analysis/ecc_caller/mapfile",
                 # ecc_caller_callEccDNAs
-                "test-output.txt",
+                expand("{units.sample}.test-output.txt", units=units.itertuples()),
 
 rule ref_index:
     input:
@@ -462,9 +462,9 @@ rule ecc_caller_callEccDNAs:
     params:
                 outname = "analysis/ecc_caller/alignments/{sample}",
     output:
-                "test-output.txt"
+                "{sample}.test-output.txt"
     log:
-                "logs/ecc_caller/createMapfile.log",
+                "logs/ecc_caller/{sample}.createMapfile.log",
     conda:
                 "envs/ecc_caller.yaml",
     resources:
