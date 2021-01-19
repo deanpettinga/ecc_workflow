@@ -1,0 +1,3 @@
+[submodule "envs/ecc_caller"]
+	path = envs/ecc_caller
+	url = git://github.com/pierrj/ecc_caller
