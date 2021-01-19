@@ -4,53 +4,14 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bedtools=2.29.2=h37cfd92_0
-  - bwa=0.7.17=h2573ce8_7
-  - bzip2=1.0.8=hc929b4f_4
-  - c-ares=1.17.1=hc929b4f_0
-  - ca-certificates=2020.12.5=h033912b_0
-  - certifi=2020.12.5=py38h50d1736_1
-  - cutadapt=3.2=py38h771b250_0
-  - dnaio=0.5.0=py38h771b250_0
-  - htslib=1.11=h422799e_2
-  - krb5=1.17.1=hddcf347_0
-  - libblas=3.9.0=7_openblas
-  - libcblas=3.9.0=7_openblas
-  - libcurl=7.71.1=h9bf37e3_8
-  - libcxx=10.0.0=1
-  - libdeflate=1.7=h35c211d_5
-  - libedit=3.1.20191231=h1de35cc_1
-  - libev=4.33=haf1e3a3_1
-  - libffi=3.3=hb1e8313_2
-  - libgfortran=4.0.0=7_5_0_h1a10cd1_16
-  - libgfortran4=7.5.0=h1a10cd1_16
-  - liblapack=3.9.0=7_openblas
-  - libnghttp2=1.41.0=h8a08a2b_1
-  - libopenblas=0.3.12=openmp_h63d9170_1
-  - libssh2=1.9.0=h8a08a2b_5
-  - llvm-openmp=11.0.1=h7c73e74_0
-  - ncurses=6.2=h0a44026_1
-  - numpy=1.19.5=py38h6ced74f_1
-  - openssl=1.1.1i=h35c211d_0
-  - pandas=1.0.1=py38h4f17bb1_0
-  - parallel=20201122=h694c41f_0
-  - perl=5.32.0=hbcb3906_0
-  - pigz=2.3.4=hbbe82c9_1
-  - pip=20.3.3=py38hecd8cb5_0
-  - python=3.8.5=h26836e1_1
-  - python-dateutil=2.8.1=py_0
-  - python_abi=3.8=1_cp38
-  - pytz=2020.5=pyhd8ed1ab_0
-  - readline=8.0=h1de35cc_0
-  - samtools=1.11=h725deca_0
-  - scipy=1.4.1=py38h38b60c6_3
-  - setuptools=51.3.3=py38hecd8cb5_4
-  - six=1.15.0=pyh9f0ad1d_0
-  - sqlite=3.33.0=hffcf06c_0
-  - tk=8.6.10=hb0a8c7a_0
-  - wheel=0.36.2=pyhd3eb1b0_0
-  - xopen=1.0.1=py38h50d1736_1
-  - xz=5.2.5=h1de35cc_0
-  - zlib=1.2.11=h1de35cc_3
+  - bedtools
+  - bwa
+  - cutadapt
+  - numpy
+  - pandas
+  - parallel
+  - python=3.8.5
+  - samtools
+  - scipy
 variables:
   ECC_CALLER_PYTHON_SCRIPTS: ./envs/ecc_caller/python_scripts
