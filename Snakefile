@@ -516,9 +516,9 @@ rule call_ecc_regions:
                 bai = "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam.bai",
                 mapfile = "analysis/ecc_caller/mapfile",
     params:
-                sample = "analysis/ecc_caller/{sample}",
+                sample = "{sample}",
     output:
-                "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
+                "{sample}.confirmedsplitreads.bed",
     log:
                 "logs/call_ecc_regions/{sample}.call_ecc_regions.log",
     conda:
