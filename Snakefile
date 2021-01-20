@@ -517,6 +517,7 @@ rule call_ecc_regions:
                 mapfile = "analysis/ecc_caller/mapfile",
     params:
                 outprefix = "analysis/ecc_caller/",
+                sample = "analysis/ecc_caller/{sample}",
     output:
                 "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
     log:
