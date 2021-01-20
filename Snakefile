@@ -493,6 +493,8 @@ rule ecc_caller_callEccDNAs:
                 mem_gb =  64,
     shell:
                 """
+                export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
+                
                 envs/ecc_caller/generate_bam_file.sh \
                 -g {input.ref} \
                 -1 {input.R1} \
