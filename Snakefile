@@ -63,7 +63,7 @@ rule all:
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
                 # call_ecc_regions
-                "filtered.sorted.IF_3C.bam",
+                "analysis/ecc_caller/IF_3C.confirmedsplitreads.bed",
                 # expand("filtered.sorted.{units.sample}.bam", units=units.itertuples()),
 
 rule ref_index:
@@ -516,11 +516,11 @@ rule call_ecc_regions:
                 bai = "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam.bai",
                 mapfile = "analysis/ecc_caller/mapfile",
     params:
-                sample = "{sample}"
+                sample = "analysis/ecc_caller/{sample}",
     output:
-                "filtered.sorted.{sample}.bam"
+                "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
     log:
-                "logs/call_ecc_regions/{sample}.call_ecc_regions.log"
+                "logs/call_ecc_regions/{sample}.call_ecc_regions.log",
     conda:
                 "envs/ecc_caller.yaml",
     resources:
@@ -535,7 +535,7 @@ rule call_ecc_regions:
                 -m {input.mapfile} \
                 -s {params.sample} \
                 -t {resources.threads} \
-                -b {output} \
+                -b {input.bam} \
                 2&1> {log}
                 """
 
