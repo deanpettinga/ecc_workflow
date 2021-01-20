@@ -63,8 +63,8 @@ rule all:
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
                 # call_ecc_regions
-                expand("analysis/ecc_caller/{units.sample}.filtered.sorted.bam", units=units.itertuples()),
-                
+                expand("filtered.sorted.{units.sample}.bam", units=units.itertuples()),
+
 rule ref_index:
     input:
                 config["reference_genome"]
@@ -517,9 +517,9 @@ rule call_ecc_regions:
     params:
                 sample = "{sample}"
     output:
-                "analysis/ecc_caller/{sample}.filtered.sorted.bam"
+                "filtered.sorted.{sample}.bam"
     log:
-                "logs/ecc_call_ecc_regions/{sample}.call_ecc_regions.log"
+                "logs/call_ecc_regions/{sample}.call_ecc_regions.log"
     conda:
                 "envs/ecc_caller.yaml",
     resources:
@@ -534,5 +534,34 @@ rule call_ecc_regions:
                 -m {input.mapfile} \
                 -s {params.sample} \
                 -t {resources.threads} \
-                -b {input.bam}
+                -b {output} \
+                2&1> {log}
                 """
+
+# rule assign_confidence:
+#     input:
+#                 mapfile = "analysis/ecc_caller/mapfile",
+#                 bam = "analysis/ecc_caller/{sample}.filtered.sorted.bam",
+#     params:
+#                 sample = "analysis/ecc_caller/{sample}"
+#     output:
+#                 "analysis/"
+#     log:
+#                 "logs/assign_confidence/{sample}.assign_confidence.log"
+#     conda:
+#                 "envs/ecc_caller.yaml"
+#     resources:
+#                 threads = 20,
+#                 nodes =   1,
+#                 mem_gb =  64,
+#     shell:
+#                 """
+#                 export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
+#
+#                 assign_confidence.sh \
+#                 -m {input.mapfile} \
+#                 -s output_name \
+#                 -t {resources.threads} \
+#                 -b {input.bam} \
+#                 -r output_name.confirmedsplitreads.bed
+#                 """
