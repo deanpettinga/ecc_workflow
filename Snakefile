@@ -516,7 +516,7 @@ rule call_ecc_regions:
                 bai = "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam.bai",
                 mapfile = "analysis/ecc_caller/mapfile",
     params:
-                sample = "{sample}",
+                outprefix = "analysis/ecc_caller/",
     output:
                 "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
     log:
@@ -531,6 +531,26 @@ rule call_ecc_regions:
                 """
                 export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
 
+                # due to script naming of outputs, it cannot create temporary files
+                # because they have nested subdirs, so they are created by hand
+                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.all.{params.outprefix}
+                mkdir -p tmp.outwardfacing.{params.outprefix}
+                mkdir -p tmp.qualityfiltered.forwardmerged.{params.outprefix}
+                mkdir -p tmp.qualityfiltered.forwardread1.{params.outprefix}
+                mkdir -p tmp.qualityfiltered.forwardread2.{params.outprefix}
+                mkdir -p tmp.qualityfiltered.reversemerged.{params.outprefix}
+                mkdir -p tmp.qualityfiltered.reverseread1.{params.outprefix}
+                mkdir -p tmp.qualityfiltered.reverseread2.{params.outprefix}
+                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.forwardmerged.{params.outprefix}
+                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.forwardread1.{params.outprefix}
+                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.forwardread2.{params.outprefix}
+                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.reversemerged.{params.outprefix}
+                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.reverseread1.{params.outprefix}
+                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.reverseread2.{params.outprefix}
+                mkdir -p tmp.seqprep.trimmed.{params.outprefix}
+                mkdir -p tmp.trimmed.seqprep.{params.outprefix}
+
+                # now run the script
                 envs/ecc_caller/call_ecc_regions.sh \
                 -m {input.mapfile} \
                 -s {params.sample} \
@@ -538,6 +558,24 @@ rule call_ecc_regions:
                 -b {input.bam} \
                 2&1> {log}
                 """
+
+# tmpdirs
+tmp.oriented.samechromosome.exactlytwice.qualityfiltered.all.analysis
+tmp.outwardfacing.analysis
+tmp.qualityfiltered.forwardmerged.analysis
+tmp.qualityfiltered.forwardread1.analysis
+tmp.qualityfiltered.forwardread2.analysis
+tmp.qualityfiltered.reversemerged.analysis
+tmp.qualityfiltered.reverseread1.analysis
+tmp.qualityfiltered.reverseread2.analysis
+tmp.samechromosome.exactlytwice.qualityfiltered.forwardmerged.analysis
+tmp.samechromosome.exactlytwice.qualityfiltered.forwardread1.analysis
+tmp.samechromosome.exactlytwice.qualityfiltered.forwardread2.analysis
+tmp.samechromosome.exactlytwice.qualityfiltered.reversemerged.analysis
+tmp.samechromosome.exactlytwice.qualityfiltered.reverseread1.analysis
+tmp.samechromosome.exactlytwice.qualityfiltered.reverseread2.analysis
+tmp.seqprep.trimmed.analysis
+tmp.trimmed.seqprep.analysis
 
 # rule assign_confidence:
 #     input:
