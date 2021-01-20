@@ -571,7 +571,7 @@ rule call_ecc_regions:
                 -s {params.sample} \
                 -t {resources.threads} \
                 -b {input.bam} \
-                2&1> {log}
+                &> {log}
                 """
 
 # rule assign_confidence:
