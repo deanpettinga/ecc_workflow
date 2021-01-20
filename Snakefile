@@ -550,6 +550,20 @@ rule call_ecc_regions:
                 mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.reverseread2.{params.outprefix}
                 mkdir -p tmp.seqprep.trimmed.{params.outprefix}
                 mkdir -p tmp.trimmed.seqprep.{params.outprefix}
+                mkdir -p tmp.reverseread1.{params.outprefix}
+                mkdir -p tmp.reverseread2.{params.outprefix}
+                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.reverseread1.{params.outprefix}
+                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.reverseread2.{params.outprefix}
+                mkdir -p tmp.forwardread1.{params.outprefix}
+                mkdir -p tmp.forwardread2.{params.outprefix}
+                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.forwardread1.{params.outprefix}
+                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.forwardread2.{params.outprefix}
+                mkdir -p tmp.reversemerged.{params.outprefix}
+                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.reversemerged.{params.outprefix}
+                mkdir -p tmp.forwardmerged.{params.outprefix}
+                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.forwardmerged.{params.outprefix}
+                mkdir -p splitreads.{params.outprefix}
+                mkdir -p merged.splitreads.{params.outprefix}
 
                 # now run the script
                 envs/ecc_caller/call_ecc_regions.sh \
