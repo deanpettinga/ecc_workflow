@@ -437,6 +437,26 @@ rule plotPCA:
                 2>> {log}
                 """
 
+rule gunzip_reads:
+    input:
+                R1 = "raw_data/{sample}-R1.fastq.gz",
+                R2 = "raw_data/{sample}-R2.fastq.gz",
+    output:
+                R1 = "analysis/gunzip_reads/{sample}-R1.fastq",
+                R2 = "analysis/gunzip_reads/{sample}-R2.fastq",
+    log:
+                R1 = "logs/gunzip_reads/{sample}-R1.log",
+                R2 = "logs/gunzip_reads/{sample}-R2.log",
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                gunzip -c {input.R1} 1> {output.R1} 2> {log.R1}
+                gunzip -c {input.R2} 1> {output.R21} 2> {log.R2}
+                """
+
 rule ecc_caller_createMapfile:
     input:
                 config["reference_genome"],
@@ -457,14 +477,14 @@ rule ecc_caller_callEccDNAs:
     input:
                 ref = config["reference_genome"],
                 mapfile = "analysis/ecc_caller/mapfile",
-                R1 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
-                R2 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
+                R1 = "analysis/gunzip_reads/{sample}-R1.fastq",
+                R2 = "analysis/gunzip_reads/{sample}-R2.fastq",
     params:
                 outname = "analysis/ecc_caller/alignments/{sample}",
     output:
-                "{sample}.test-output.txt"
+                "analysis/ecc_caller/alignments/{sample}.sorted.mergedandpe.bwamem.bam"
     log:
-                "logs/ecc_caller/{sample}.createMapfile.log",
+                "logs/ecc_caller/{sample}.ecc_caller_callEccDNAs.log",
     conda:
                 "envs/ecc_caller.yaml",
     resources:
