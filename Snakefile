@@ -60,7 +60,7 @@ rule all:
                 # ecc_caller_createMapfile
                 "analysis/ecc_caller/mapfile",
                 # ecc_caller_callEccDNAs
-                expand("{units.sample}.test-output.txt", units=units.itertuples()),
+                expand("analysis/ecc_caller/alignments/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
 
 rule ref_index:
     input:
