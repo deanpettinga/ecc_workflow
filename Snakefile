@@ -559,24 +559,6 @@ rule call_ecc_regions:
                 2&1> {log}
                 """
 
-# tmpdirs
-tmp.oriented.samechromosome.exactlytwice.qualityfiltered.all.analysis
-tmp.outwardfacing.analysis
-tmp.qualityfiltered.forwardmerged.analysis
-tmp.qualityfiltered.forwardread1.analysis
-tmp.qualityfiltered.forwardread2.analysis
-tmp.qualityfiltered.reversemerged.analysis
-tmp.qualityfiltered.reverseread1.analysis
-tmp.qualityfiltered.reverseread2.analysis
-tmp.samechromosome.exactlytwice.qualityfiltered.forwardmerged.analysis
-tmp.samechromosome.exactlytwice.qualityfiltered.forwardread1.analysis
-tmp.samechromosome.exactlytwice.qualityfiltered.forwardread2.analysis
-tmp.samechromosome.exactlytwice.qualityfiltered.reversemerged.analysis
-tmp.samechromosome.exactlytwice.qualityfiltered.reverseread1.analysis
-tmp.samechromosome.exactlytwice.qualityfiltered.reverseread2.analysis
-tmp.seqprep.trimmed.analysis
-tmp.trimmed.seqprep.analysis
-
 # rule assign_confidence:
 #     input:
 #                 mapfile = "analysis/ecc_caller/mapfile",
