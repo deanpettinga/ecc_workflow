@@ -63,7 +63,8 @@ rule all:
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
                 # call_ecc_regions
-                expand("filtered.sorted.{units.sample}.bam", units=units.itertuples()),
+                "filtered.sorted.IF_3C.bam",
+                # expand("filtered.sorted.{units.sample}.bam", units=units.itertuples()),
 
 rule ref_index:
     input:
