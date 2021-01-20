@@ -62,6 +62,9 @@ rule all:
                 # ecc_caller_align
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
                 expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
+                # call_ecc_regions
+                expand("analysis/ecc_caller/{units.sample}.filtered.sorted.bam", units=units.itertuples()),
+                
 rule ref_index:
     input:
                 config["reference_genome"]
