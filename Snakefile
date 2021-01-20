@@ -59,9 +59,9 @@ rule all:
                 # "analysis/deeptools/multiBamSummary.pca.png",
                 # ecc_caller_createMapfile
                 "analysis/ecc_caller/mapfile",
-                # ecc_caller_callEccDNAs
-                expand("analysis/ecc_caller/alignments/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
-
+                # ecc_caller_align
+                expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
+                expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
 rule ref_index:
     input:
                 config["reference_genome"]
@@ -473,7 +473,7 @@ rule ecc_caller_createMapfile:
     shell:
                 "grep '>' {input} | awk '{{print substr($1,2)}}' 1> {output} 2> {log}"
 
-rule ecc_caller_callEccDNAs:
+rule ecc_caller_align:
     input:
                 ref = config["reference_genome"],
                 mapfile = "analysis/ecc_caller/mapfile",
@@ -482,9 +482,10 @@ rule ecc_caller_callEccDNAs:
     params:
                 outname = "analysis/ecc_caller/alignments/{sample}",
     output:
-                "analysis/ecc_caller/alignments/{sample}.sorted.mergedandpe.bwamem.bam"
+                "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam",
+                "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam.bai",
     log:
-                "logs/ecc_caller/{sample}.ecc_caller_callEccDNAs.log",
+                "logs/ecc_caller/{sample}.ecc_caller_align.log",
     conda:
                 "envs/ecc_caller.yaml",
     resources:
@@ -502,5 +503,33 @@ rule ecc_caller_callEccDNAs:
                 -s {params.outname} \
                 -t {resources.threads} \
                 -m {input.mapfile} \
-                2> {log}
+                2&1> {log}
+                """
+
+rule call_ecc_regions:
+    input:
+                bam = "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam",
+                bai = "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam.bai",
+                mapfile = "analysis/ecc_caller/mapfile",
+    params:
+                sample = "{sample}"
+    output:
+                "analysis/ecc_caller/{sample}.filtered.sorted.bam"
+    log:
+                "logs/ecc_call_ecc_regions/{sample}.call_ecc_regions.log"
+    conda:
+                "envs/ecc_caller.yaml",
+    resources:
+                threads = 20,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
+
+                envs/ecc_caller/call_ecc_regions.sh \
+                -m {input.mapfile} \
+                -s {params.sample} \
+                -t {resources.threads} \
+                -b {input.bam}
                 """
