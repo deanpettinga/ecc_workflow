@@ -518,7 +518,7 @@ rule call_ecc_regions:
     params:
                 sample = "{sample}",
     output:
-                "{sample}.confirmedsplitreads.bed",
+                "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
     log:
                 "logs/call_ecc_regions/{sample}.call_ecc_regions.log",
     conda:
