@@ -454,7 +454,7 @@ rule gunzip_reads:
     shell:
                 """
                 gunzip -c {input.R1} 1> {output.R1} 2> {log.R1}
-                gunzip -c {input.R2} 1> {output.R21} 2> {log.R2}
+                gunzip -c {input.R2} 1> {output.R1} 2> {log.R2}
                 """
 
 rule ecc_caller_createMapfile:
