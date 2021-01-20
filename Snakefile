@@ -499,5 +499,6 @@ rule ecc_caller_callEccDNAs:
                 -2 {input.R2} \
                 -s {params.outname} \
                 -t {resources.threads} \
-                -m {input.mapfile}
+                -m {input.mapfile} \
+                2> {log}
                 """
