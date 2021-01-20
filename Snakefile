@@ -488,13 +488,13 @@ rule ecc_caller_callEccDNAs:
     conda:
                 "envs/ecc_caller.yaml",
     resources:
-                threads = 1,
+                threads = 20,
                 nodes =   1,
                 mem_gb =  64,
     shell:
                 """
                 export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
-                
+
                 envs/ecc_caller/generate_bam_file.sh \
                 -g {input.ref} \
                 -1 {input.R1} \
