@@ -60,10 +60,10 @@ rule all:
                 # ecc_caller_createMapfile
                 "analysis/ecc_caller/mapfile",
                 # ecc_caller_align
-                expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
-                expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
+                # expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
+                # expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
                 # call_ecc_regions
-                "analysis/ecc_caller/IF_3C.confirmedsplitreads.bed",
+                "IF_3C.confirmedsplitreads.bed",
                 # expand("filtered.sorted.{units.sample}.bam", units=units.itertuples()),
 
 rule ref_index:
@@ -446,8 +446,8 @@ rule gunzip_reads:
                 R1 = "raw_data/{sample}-R1.fastq.gz",
                 R2 = "raw_data/{sample}-R2.fastq.gz",
     output:
-                R1 = "analysis/gunzip_reads/{sample}-R1.fastq",
-                R2 = "analysis/gunzip_reads/{sample}-R2.fastq",
+                R1 = "raw_data/{sample}-R1.fastq",
+                R2 = "raw_data/{sample}-R2.fastq",
     log:
                 R1 = "logs/gunzip_reads/{sample}-R1.log",
                 R2 = "logs/gunzip_reads/{sample}-R2.log",
@@ -481,13 +481,13 @@ rule ecc_caller_align:
     input:
                 ref = config["reference_genome"],
                 mapfile = "analysis/ecc_caller/mapfile",
-                R1 = "analysis/gunzip_reads/{sample}-R1.fastq",
-                R2 = "analysis/gunzip_reads/{sample}-R2.fastq",
+                R1 = "raw_data/{sample}-R1.fastq",
+                R2 = "raw_data/{sample}-R2.fastq",
     params:
-                outname = "analysis/ecc_caller/alignments/{sample}",
+                outname = "{sample}",
     output:
-                "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam",
-                "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam.bai",
+                "{sample}.sorted.mergedandpe.bwamem.bam",
+                "{sample}.sorted.mergedandpe.bwamem.bam.bai",
     log:
                 "logs/ecc_caller/{sample}.ecc_caller_align.log",
     conda:
@@ -512,14 +512,13 @@ rule ecc_caller_align:
 
 rule call_ecc_regions:
     input:
-                bam = "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam",
-                bai = "analysis/ecc_caller/{sample}.sorted.mergedandpe.bwamem.bam.bai",
+                bam = "{sample}.sorted.mergedandpe.bwamem.bam",
+                bai = "{sample}.sorted.mergedandpe.bwamem.bam.bai",
                 mapfile = "analysis/ecc_caller/mapfile",
     params:
-                outprefix = "analysis/ecc_caller/",
-                sample = "analysis/ecc_caller/{sample}",
+                sample = "{sample}",
     output:
-                "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
+                "{sample}.confirmedsplitreads.bed",
     log:
                 "logs/call_ecc_regions/{sample}.call_ecc_regions.log",
     conda:
@@ -531,39 +530,6 @@ rule call_ecc_regions:
     shell:
                 """
                 export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
-
-                # due to script naming of outputs, it cannot create temporary files
-                # because they have nested subdirs, so they are created by hand
-                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.all.{params.outprefix}
-                mkdir -p tmp.outwardfacing.{params.outprefix}
-                mkdir -p tmp.qualityfiltered.forwardmerged.{params.outprefix}
-                mkdir -p tmp.qualityfiltered.forwardread1.{params.outprefix}
-                mkdir -p tmp.qualityfiltered.forwardread2.{params.outprefix}
-                mkdir -p tmp.qualityfiltered.reversemerged.{params.outprefix}
-                mkdir -p tmp.qualityfiltered.reverseread1.{params.outprefix}
-                mkdir -p tmp.qualityfiltered.reverseread2.{params.outprefix}
-                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.forwardmerged.{params.outprefix}
-                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.forwardread1.{params.outprefix}
-                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.forwardread2.{params.outprefix}
-                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.reversemerged.{params.outprefix}
-                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.reverseread1.{params.outprefix}
-                mkdir -p tmp.samechromosome.exactlytwice.qualityfiltered.reverseread2.{params.outprefix}
-                mkdir -p tmp.seqprep.trimmed.{params.outprefix}
-                mkdir -p tmp.trimmed.seqprep.{params.outprefix}
-                mkdir -p tmp.reverseread1.{params.outprefix}
-                mkdir -p tmp.reverseread2.{params.outprefix}
-                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.reverseread1.{params.outprefix}
-                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.reverseread2.{params.outprefix}
-                mkdir -p tmp.forwardread1.{params.outprefix}
-                mkdir -p tmp.forwardread2.{params.outprefix}
-                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.forwardread1.{params.outprefix}
-                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.forwardread2.{params.outprefix}
-                mkdir -p tmp.reversemerged.{params.outprefix}
-                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.reversemerged.{params.outprefix}
-                mkdir -p tmp.forwardmerged.{params.outprefix}
-                mkdir -p tmp.oriented.samechromosome.exactlytwice.qualityfiltered.forwardmerged.{params.outprefix}
-                mkdir -p splitreads.{params.outprefix}
-                mkdir -p merged.splitreads.{params.outprefix}
 
                 # now run the script
                 envs/ecc_caller/call_ecc_regions.sh \
