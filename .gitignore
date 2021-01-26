@@ -4,6 +4,7 @@ analysis/blast
 analysis/deeptools/*
 analysis/circleMap_Repeats
 analysis/multiqc
+analysis/ecc_caller/mapfile
 
 analysis/R/circles.collapsed.*
 analysis/R/eccDNA-analysis.html

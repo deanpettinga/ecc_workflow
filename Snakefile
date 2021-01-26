@@ -64,7 +64,8 @@ rule all:
                 # expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
                 # call_ecc_regions
                 "IF_3C.confirmedsplitreads.bed",
-                # expand("filtered.sorted.{units.sample}.bam", units=units.itertuples()),
+                # assign_confidence
+                "IF_3C.ecccaller_output.renamed.details.tsv",
 
 rule ref_index:
     input:
@@ -507,7 +508,7 @@ rule ecc_caller_align:
                 -s {params.outname} \
                 -t {resources.threads} \
                 -m {input.mapfile} \
-                2&1> {log}
+                &> {log}
                 """
 
 rule call_ecc_regions:
@@ -519,8 +520,16 @@ rule call_ecc_regions:
                 sample = "{sample}",
     output:
                 "{sample}.confirmedsplitreads.bed",
+                "{sample}.lengthfiltered.merged.splitreads.renamed.bed",
+                "{sample}.merged.splitreads.bed",
+                "{sample}.outwardfacing.bed",
+                "{sample}.outwardfacing.renamed.bed",
+                "{sample}.parallel.plusone.confirmed",
+                "{sample}.sorted.grouped.outwardfacing.renamed.bed",
+                "{sample}.sorted.outwardfacing.renamed.bed",
+                "{sample}.splitreads.bed",
     log:
-                "logs/call_ecc_regions/{sample}.call_ecc_regions.log",
+                "logs/ecc_caller/{sample}.call_ecc_regions.log",
     conda:
                 "envs/ecc_caller.yaml",
     resources:
@@ -531,7 +540,6 @@ rule call_ecc_regions:
                 """
                 export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
 
-                # now run the script
                 envs/ecc_caller/call_ecc_regions.sh \
                 -m {input.mapfile} \
                 -s {params.sample} \
@@ -540,30 +548,33 @@ rule call_ecc_regions:
                 &> {log}
                 """
 
-# rule assign_confidence:
-#     input:
-#                 mapfile = "analysis/ecc_caller/mapfile",
-#                 bam = "analysis/ecc_caller/{sample}.filtered.sorted.bam",
-#     params:
-#                 sample = "analysis/ecc_caller/{sample}"
-#     output:
-#                 "analysis/"
-#     log:
-#                 "logs/assign_confidence/{sample}.assign_confidence.log"
-#     conda:
-#                 "envs/ecc_caller.yaml"
-#     resources:
-#                 threads = 20,
-#                 nodes =   1,
-#                 mem_gb =  64,
-#     shell:
-#                 """
-#                 export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
-#
-#                 assign_confidence.sh \
-#                 -m {input.mapfile} \
-#                 -s output_name \
-#                 -t {resources.threads} \
-#                 -b {input.bam} \
-#                 -r output_name.confirmedsplitreads.bed
-#                 """
+rule assign_confidence:
+    input:
+                mapfile = "analysis/ecc_caller/mapfile",
+                bed = "{sample}.confirmedsplitreads.bed",
+                bam = "{sample}.sorted.mergedandpe.bwamem.bam",
+                bai = "{sample}.sorted.mergedandpe.bwamem.bam.bai",
+    params:
+                sample = "{sample}",
+    output:
+                "{sample}.ecccaller_output.renamed.details.tsv",
+    log:
+                "logs/ecc_caller/{sample}.assign_confidence.log"
+    conda:
+                "envs/ecc_caller.yaml"
+    resources:
+                threads = 20,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                export ECC_CALLER_PYTHON_SCRIPTS=envs/ecc_caller/python_scripts
+
+                envs/ecc_caller/assign_confidence.sh \
+                -m {input.mapfile} \
+                -s {params.sample} \
+                -t {resources.threads} \
+                -b {input.bam} \
+                -r {input.bed} \
+                &> {log}
+                """
