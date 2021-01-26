@@ -58,10 +58,9 @@ rule all:
                 # plotPCA
                 # "analysis/deeptools/multiBamSummary.pca.png",
                 # ecc_caller_createMapfile
-                "analysis/ecc_caller/mapfile",
+                # "analysis/ecc_caller/mapfile",
                 # ecc_caller_align
-                # expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam", units=units.itertuples()),
-                # expand("analysis/ecc_caller/{units.sample}.sorted.mergedandpe.bwamem.bam.bai", units=units.itertuples()),
+                "IF_3C.filtered.sorted.bam",
                 # call_ecc_regions
                 "IF_3C.confirmedsplitreads.bed",
                 # assign_confidence
@@ -476,7 +475,7 @@ rule ecc_caller_createMapfile:
                 nodes =   1,
                 mem_gb =  64,
     shell:
-                "grep '>' {input} | awk '{{print substr($1,2)}}' 1> {output} 2> {log}"
+                "grep '>' {input} | grep chromosome | awk '{{print substr($1,2)}}' 1> {output} 2> {log}"
 
 rule ecc_caller_align:
     input:
@@ -487,8 +486,6 @@ rule ecc_caller_align:
     params:
                 outname = "{sample}",
     output:
-                "{sample}.sorted.mergedandpe.bwamem.bam",
-                "{sample}.sorted.mergedandpe.bwamem.bam.bai",
                 "{sample}.filtered.sorted.bam",
     log:
                 "logs/ecc_caller/{sample}.ecc_caller_align.log",
@@ -520,14 +517,6 @@ rule call_ecc_regions:
                 sample = "{sample}",
     output:
                 "{sample}.confirmedsplitreads.bed",
-                "{sample}.lengthfiltered.merged.splitreads.renamed.bed",
-                "{sample}.merged.splitreads.bed",
-                "{sample}.outwardfacing.bed",
-                "{sample}.outwardfacing.renamed.bed",
-                "{sample}.parallel.plusone.confirmed",
-                "{sample}.sorted.grouped.outwardfacing.renamed.bed",
-                "{sample}.sorted.outwardfacing.renamed.bed",
-                "{sample}.splitreads.bed",
     log:
                 "logs/ecc_caller/{sample}.call_ecc_regions.log",
     conda:

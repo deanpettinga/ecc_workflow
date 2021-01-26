@@ -11,3 +11,7 @@
     - when i tried to go from `generate_bam_file.sh` to `call_ecc_regions`, ecc_caller could not find the appropriate bams because it assumed they were in the base directory.
     - `generate_bam_file` places -s before a file suffix: `{-s}.sorted.mergedandpe.bwamem.bam`
     - `call_ecc_regions` places -s in the middle of a file suffix `filtered.sorted.{-s}.bam`
+  4. error messages:
+    - is it possible to make error messages refer to a line in a script (bash or python?)
+    - make the program stop if certain files are empty and give an error message. this would make my workflow error out, stop and give me a reason why.
+  
