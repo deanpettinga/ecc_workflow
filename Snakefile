@@ -489,6 +489,7 @@ rule ecc_caller_align:
     output:
                 "{sample}.sorted.mergedandpe.bwamem.bam",
                 "{sample}.sorted.mergedandpe.bwamem.bam.bai",
+                "{sample}.filtered.sorted.bam",
     log:
                 "logs/ecc_caller/{sample}.ecc_caller_align.log",
     conda:
@@ -513,8 +514,7 @@ rule ecc_caller_align:
 
 rule call_ecc_regions:
     input:
-                bam = "{sample}.sorted.mergedandpe.bwamem.bam",
-                bai = "{sample}.sorted.mergedandpe.bwamem.bam.bai",
+                bam = "{sample}.filtered.sorted.bam",
                 mapfile = "analysis/ecc_caller/mapfile",
     params:
                 sample = "{sample}",
