@@ -552,8 +552,7 @@ rule assign_confidence:
     input:
                 mapfile = "analysis/ecc_caller/mapfile",
                 bed = "{sample}.confirmedsplitreads.bed",
-                bam = "{sample}.sorted.mergedandpe.bwamem.bam",
-                bai = "{sample}.sorted.mergedandpe.bwamem.bam.bai",
+                bam = "{sample}.filtered.sorted.bam",
     params:
                 sample = "{sample}",
     output:
