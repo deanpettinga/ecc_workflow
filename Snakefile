@@ -60,11 +60,11 @@ rule all:
                 # ecc_caller_createMapfile
                 # "analysis/ecc_caller/mapfile",
                 # ecc_caller_align
-                "IF_3C.filtered.sorted.bam",
+                "analysis/ecc_caller/IF_3C.filtered.sorted.bam",
                 # call_ecc_regions
-                "IF_3C.confirmedsplitreads.bed",
+                "analysis/ecc_caller/IF_3C.confirmedsplitreads.bed",
                 # assign_confidence
-                "IF_3C.ecccaller_output.renamed.details.tsv",
+                "analysis/ecc_caller/IF_3C.ecccaller_output.renamed.details.tsv",
 
 rule ref_index:
     input:
@@ -440,6 +440,8 @@ rule plotPCA:
                 -T "PCA of read counts" \
                 2>> {log}
                 """
+
+# pierre's ecc_caller
 
 rule gunzip_reads:
     input:
