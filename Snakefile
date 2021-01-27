@@ -60,11 +60,11 @@ rule all:
                 # ecc_caller_createMapfile
                 # "analysis/ecc_caller/mapfile",
                 # ecc_caller_align
-                "analysis/ecc_caller/IF_3C.filtered.sorted.bam",
+                # expand("analysis/ecc_caller/{units.sample}.filtered.sorted.bam", units=units.itertuples()),
                 # call_ecc_regions
-                "analysis/ecc_caller/IF_3C.confirmedsplitreads.bed",
+                # expand("analysis/ecc_caller/{units.sample}.confirmedsplitreads.bed", units=units.itertuples()),
                 # assign_confidence
-                "analysis/ecc_caller/IF_3C.ecccaller_output.renamed.details.tsv",
+                expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.tsv", units=units.itertuples()),
 
 rule ref_index:
     input:
@@ -486,9 +486,9 @@ rule ecc_caller_align:
                 R1 = "raw_data/{sample}-R1.fastq",
                 R2 = "raw_data/{sample}-R2.fastq",
     params:
-                outname = "{sample}",
+                outname = "analysis/ecc_caller/{sample}",
     output:
-                "{sample}.filtered.sorted.bam",
+                "analysis/ecc_caller/{sample}.filtered.sorted.bam",
     log:
                 "logs/ecc_caller/{sample}.ecc_caller_align.log",
     conda:
@@ -513,12 +513,12 @@ rule ecc_caller_align:
 
 rule call_ecc_regions:
     input:
-                bam = "{sample}.filtered.sorted.bam",
+                bam = "analysis/ecc_caller/{sample}.filtered.sorted.bam",
                 mapfile = "analysis/ecc_caller/mapfile",
     params:
-                sample = "{sample}",
+                sample = "analysis/ecc_caller/{sample}",
     output:
-                "{sample}.confirmedsplitreads.bed",
+                "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
     log:
                 "logs/ecc_caller/{sample}.call_ecc_regions.log",
     conda:
@@ -542,13 +542,13 @@ rule call_ecc_regions:
 rule assign_confidence:
     input:
                 mapfile = "analysis/ecc_caller/mapfile",
-                bed = "{sample}.confirmedsplitreads.bed",
-                bam = "{sample}.filtered.sorted.bam",
+                bed = "analysis/ecc_caller/{sample}.confirmedsplitreads.bed",
+                bam = "analysis/ecc_caller/{sample}.filtered.sorted.bam",
     params:
-                sample = "{sample}",
+                sample = "analysis/ecc_caller/{sample}",
     output:
-                "{sample}.ecccaller_output.renamed.details.tsv",
-                "{sample}.ecccaller_output.renamed.bed",
+                "analysis/ecc_caller/{sample}.ecccaller_output.renamed.details.tsv",
+                "analysis/ecc_caller/{sample}.ecccaller_output.renamed.bed",
     log:
                 "logs/ecc_caller/{sample}.assign_confidence.log"
     conda:
