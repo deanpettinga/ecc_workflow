@@ -546,6 +546,7 @@ rule assign_confidence:
                 sample = "{sample}",
     output:
                 "{sample}.ecccaller_output.renamed.details.tsv",
+                "{sample}.ecccaller_output.renamed.bed",
     log:
                 "logs/ecc_caller/{sample}.assign_confidence.log"
     conda:
