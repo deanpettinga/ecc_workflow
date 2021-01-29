@@ -569,3 +569,28 @@ rule assign_confidence:
                 -r {input.bed} \
                 &> {log}
                 """
+
+rule filter_by_conf:
+    # filters the output (bed and tsv) eccDNAs by confidence assigned by ecc_caller.
+    # using the color codes provided in the input.tsv awk pulls hconf/conf and removes lowq calls
+    input:
+                tsv = "analysis/ecc_caller/{sample}.ecccaller_output.renamed.details.tsv",
+                bed = "analysis/ecc_caller/{sample}.ecccaller_output.renamed.bed",
+    output:
+                filtered_tsv = "analysis/ecc_caller/{sample}.ecccaller_output.renamed.details.conf.tsv",
+                filtered_bed = "analysis/ecc_caller/{sample}.ecccaller_output.renamed.conf.bed",
+    log:
+                "logs/ecc_caller/{sample}.filter_by_conf.log"
+    resources:
+                threads = 1,
+                nodes =   1,
+                mem_gb =  64,
+    shell:
+                """
+                # filter tsv based on the string denoting quality (exclude lowq)
+                awk -v OFS="\t" '$6 ~ /hconf/ {{print}}' {input.tsv} 1> {output.filtered_tsv} 2> {log}
+
+                # then filter the bed based on the RGB values (exclude red).
+                # also remove redundant start and end cols (7-8) and append stderr to log.
+                awk -v OFS="\t" '$9 ~ /0,255,0/ {{print}}' {input.bed} 1> {output.filtered_bed} 2>> {log}
+                """
