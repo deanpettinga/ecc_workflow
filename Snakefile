@@ -64,7 +64,10 @@ rule all:
                 # call_ecc_regions
                 # expand("analysis/ecc_caller/{units.sample}.confirmedsplitreads.bed", units=units.itertuples()),
                 # assign_confidence
-                expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.tsv", units=units.itertuples()),
+                # expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.tsv", units=units.itertuples()),
+                # filter_by_conf
+                expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.conf.tsv", units=units.itertuples()),
+                expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.conf.bed", units=units.itertuples()),
 
 rule ref_index:
     input:
