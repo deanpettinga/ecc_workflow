@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - sra-tools
+  - biscuit
+  - samblaster
+  - samtools
+  - parallel

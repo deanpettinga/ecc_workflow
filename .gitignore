@@ -1,4 +1,5 @@
 
+analysis/meme
 analysis/align
 analysis/blast
 analysis/deeptools/*
@@ -6,7 +7,7 @@ analysis/circleMap_Repeats
 analysis/multiqc
 analysis/ecc_caller/mapfile
 analysis/ecc_caller/*
-analysis/epi_marks/*
+analysis/epi_marks/
 !analysis/epi_marks/*.chromsizes
 
 analysis/R/circles.collapsed.*

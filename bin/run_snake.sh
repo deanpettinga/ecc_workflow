@@ -29,7 +29,6 @@ logs_dir="logs/runs"
 snakemake --use-conda -n > logs/runs/workflow_${TIME}.txt
 snakemake --dag | dot -Tpng > logs/runs/workflow_${TIME}.png
 
-
 snakemake \
 --use-conda \
 --jobs 20 \
@@ -38,5 +37,7 @@ snakemake \
   --account=fc_kvkallow \
   --qos=savio_normal \
   --nodes={resources.nodes} \
-  --cpus-per-task={threads} \
-  --time=72:00:00" \
+  --cpus-per-task={resources.threads} \
+  --time=72:00:00 \
+  --o logs/slurm/{resources.name}.log \
+  --e logs/slurm/{resources.name}.log"
