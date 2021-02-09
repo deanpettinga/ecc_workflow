@@ -24,4 +24,5 @@ raw_data/*
 
 refs/*
 !refs/Oryza_sativa.IRGSP-1.0.dna.fa.chromsizes
+!refs/Oryza_sativa.IRGSP-1.0.dna.centromere_clones.tsv
 .snakemake*
