@@ -39,5 +39,5 @@ snakemake \
   --nodes={resources.nodes} \
   --cpus-per-task={resources.threads} \
   --time=72:00:00 \
-  --o logs/slurm/{resources.name}.log \
-  --e logs/slurm/{resources.name}.log"
+  -o logs/slurm/{resources.name}.log \
+  -e logs/slurm/{resources.name}.log"
