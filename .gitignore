@@ -6,6 +6,8 @@ analysis/circleMap_Repeats
 analysis/multiqc
 analysis/ecc_caller/mapfile
 analysis/ecc_caller/*
+analysis/epi_marks/*
+!analysis/epi_marks/*.chromsizes
 
 analysis/R/circles.collapsed.*
 analysis/R/eccDNA-analysis.html
@@ -20,5 +22,5 @@ raw_data/*
 !raw_data/.keep
 
 refs/*
-
+!refs/Oryza_sativa.IRGSP-1.0.dna.fa.chromsizes
 .snakemake*
