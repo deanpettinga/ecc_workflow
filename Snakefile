@@ -312,7 +312,7 @@ rule filter_by_conf:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "{sample}.filter_by_conf",
+                name =      "filter_by_conf.{sample}",
     shell:
                 """
                 # filter tsv based on the string denoting quality (exclude lowq)
@@ -332,6 +332,11 @@ rule merge_tech_reps:
                 pct_overlap = "0.7",
     output:
                 "analysis/ecc_caller/{treatment}_{bio_rep}.cat.bed",
+    resources:
+                threads =   1,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "merge_tech_reps",
     conda:
                 "envs/bedtools.yaml",
     shell:
@@ -351,6 +356,11 @@ rule merge_bio_reps:
                 temp2_3 = temp("analysis/ecc_caller/tmp.{treatment}.23.bed"),
                 temp1_3 = temp("analysis/ecc_caller/tmp.{treatment}.13.bed"),
                 merged = "analysis/ecc_caller/{treatment}.merged.bed",
+    resources:
+                threads =   1,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "merge_bio_reps",
     conda:
                 "envs/bedtools.yaml",
     shell:
@@ -366,13 +376,12 @@ rule merge_bio_reps:
                 awk -v OFS='\t' '{{print $1, $2, $3, $4}}' | sort | uniq > {output.merged}
                 """
 
-# incorporating external data
+# chip datasets
 rule prepare_chip_datasets:
     # downloading data from GEO: GSE79033
     # https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE79033
     input:
                 config["reference_genome"]+".fai",
-                chromsizes = config["reference_genome"]+".chromsizes",
     params:
                 outdir = "analysis/epi_marks/"
     output:
@@ -405,7 +414,7 @@ rule prepare_chip_datasets:
 
 rule wig_to_bw:
     input:
-                chromsizes = "analysis/epi_marks/test.chromsizes",
+                chromsizes = "analysis/epi_marks/{mark}.chromsizes",
                 wig = "analysis/epi_marks/{mark}_rice_leaves.macs14_treat_afterfiting_all.wig",
     output:
                 chrRemoved = "analysis/epi_marks/{mark}_rice_leaves.macs14_treat_afterfiting_all.wig.chrRemoved",
@@ -416,7 +425,7 @@ rule wig_to_bw:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "{mark}.wig_to_bw",
+                name =      "wig_to_bw.{mark}",
     conda:
                 "envs/wigtobigwig.yaml"
     shell:
@@ -443,7 +452,7 @@ rule ecc_bed_to_fasta:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "{condition}.ecc_bed_to_fasta",
+                name =      "ecc_bed_to_fasta.{condition}",
     shell:
                 """
                 bedtools getfasta \
@@ -469,7 +478,7 @@ rule plotHeatmap:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "{mark}.plotHeatmap",
+                name =      "plotHeatmap.{mark}",
     shell:
                 """
                 computeMatrix scale-regions \
