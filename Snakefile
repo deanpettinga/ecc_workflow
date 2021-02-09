@@ -542,6 +542,7 @@ rule get_wgbs_reads:
     # download reads from SRA
     input:
     params:
+                sra = "{SRR}",
                 outdir = "analysis/epi_marks/",
     output:
                 sra = temp("analysis/epi_marks/{SRR}/{SRR}.sra"),
