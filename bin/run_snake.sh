@@ -38,4 +38,4 @@ snakemake \
   --qos=savio_normal \
   --nodes={resources.nodes} \
   --cpus-per-task={resources.threads} \
-  --time=72:00:00 
+  --time=72:00:00"
