@@ -528,7 +528,7 @@ rule get_TE_annotation:
                 brief_info = "refs/all.locus_brief_info.7.0",
                 TE_bed = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bed",
                 TE_bedgraph = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bedgraph",
-                chrom_sizes = config["reference_genome"]+".chromsizes"
+                chrom_sizes = config["reference_genome"]+".chromsizes",
                 TE_bw = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bw",
     resources:
                 threads =   1,
