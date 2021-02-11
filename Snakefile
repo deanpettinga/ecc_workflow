@@ -629,10 +629,10 @@ rule biscuit_align:
     shell:
                 """
                 biscuit align -b 1 -R "my_RG" -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
-                samblaster -addMateTags 2> {log} |\
-                samtools sort -o {output.bam} -O BAM -
+                samblaster 2>> {log} |\
+                samtools sort -@ {resources.threads} -o {output.bam} -O BAM - 2>> {log}
 
-                samtools index {output.bam} 2> {log}
+                samtools index {output.bam} 2>> {log}
                 """
 
 # rule biscuit_qc:
