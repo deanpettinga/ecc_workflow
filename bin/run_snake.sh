@@ -7,17 +7,10 @@
 #SBATCH --time=72:00:00
 #SBATCH -o logs/runs/circle.%j.o
 #SBATCH -e logs/runs/circle.%j.e
-#SBATCH --mail-user=pettinga@berkeley.edu
 #SBATCH --mail-type=All
 
 source ~/.bashrc
 conda activate snakemake
-
-# # specify which conda installation to use
-# conda_setup='/secondary/projects/bbc/tools/miniconda3/etc/profile.d/conda.sh'
-#
-# # this make 'conda' callable and allows conda environments to be created.
-# source $conda_setup
 
 # save DAG job file with time stamp
 TIME=$(date "+%Y-%m-%d_%H.%M.%S")

@@ -81,6 +81,7 @@ rule all:
                 "refs/Oryza_sativa.IRGSP-1.0.dna.centromere_clones.bed",
                 # get_TE_annotations
                 "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bed",
+                "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bw",
                 # get_wgbs_data
                 # expand("analysis/epi_marks/{SRR}_{read}.fastq", SRR=["SRR8427224"], read=[1,2]),
                 # # biscuit_align
@@ -522,18 +523,36 @@ rule get_centromere_annotation:
 
 rule get_TE_annotation:
     input:
+                ref = config["reference_genome"],
     output:
                 brief_info = "refs/all.locus_brief_info.7.0",
                 TE_bed = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bed",
+                TE_bedgraph = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bedgraph",
+                chrom_sizes = config["reference_genome"]+".chromsizes"
+                TE_bw = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bw",
     resources:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
                 name =      "get_TE_annotation",
+    conda:
+                "envs/bedgraphtobigwig.yaml",
     shell:
                 """
+                # make bed
                 wget -O {output.brief_info} http://rice.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/all.locus_brief_info.7.0
                 awk -v FS='\t' -v OFS='\t' '{{gsub(/Chr/,""); if ($7 == "Y") print $1, $4, $5, $2, "-", $6, $10}}' {output.brief_info} > {output.TE_bed}
+
+                # bed to bedgraph
+                awk '{{printf "%s\t%d\t%d\t%2.3f\n" , $1,$2,$3,1}}' {output.TE_bed} |\
+                sort -k1,1 -k2,2n - > {output.TE_bedgraph}
+
+                # make chrom.sizes
+                samtools faidx {input.ref}
+                cut -f1,2 {input.ref}.fai > {output.chrom_sizes}
+
+                # bedgraph to bw
+                bedGraphToBigWig {output.TE_bedgraph} {output.chrom_sizes} {output.TE_bw}
                 """
 
 ### Methylation Analysis ###
@@ -592,9 +611,9 @@ rule biscuit_align:
                 tempdir = "analysis/epi_marks/{SRR}.temp_dir",
     output:
                 # split and discordant SAMs and heavily clipped reads
-                clipped = "analysis/epi_marks/{SRR}.clipped.fastq",
-                disc = "analysis/epi_marks/{SRR}.disc.sam",
-                split = "analysis/epi_marks/{SRR}.split.sam",
+                # clipped = "analysis/epi_marks/{SRR}.clipped.fastq",
+                # disc = "analysis/epi_marks/{SRR}.disc.sam",
+                # split = "analysis/epi_marks/{SRR}.split.sam",
                 # duplicate marked, sorted, indexed bam
                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
                 bai = "analysis/epi_marks/{SRR}.biscuit.bam.bai",
@@ -609,13 +628,11 @@ rule biscuit_align:
                 name =      "biscuit_map.{SRR}",
     shell:
                 """
-                biscuit align -b 1 -R "my_RG" -t {resources.threads} {input.ref} {input.R1} {input.R2} |\
-                samblaster -addMateTags |\
-                parallel --tmpdir {params.tempdir} --pipe --tee {{}} ::: \
-                    "samblaster -a -e -u {output.clipped} -d {output.disc} -s {output.split} -o /dev/null" \
-                    "samtools view -hb | samtools sort -o {output.bam} -O BAM -"
+                biscuit align -b 1 -R "my_RG" -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
+                samblaster -addMateTags 2> {log} |\
+                samtools sort -o {output.bam} -O BAM -
 
-                samtools index {output.bam}
+                samtools index {output.bam} 2> {log}
                 """
 
 # rule biscuit_qc:
