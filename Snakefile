@@ -90,7 +90,7 @@ rule all:
                 # # biscuit_pileup
                 # expand("analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz", SRR=["SRR8427224"]),
                 # biscuit_vcf2bed
-                expand("analysis/epi_marks/SRR8427224.biscuit.pileup.bed", SRR="SRR8427224"),
+                expand("analysis/epi_marks/{SRR}.biscuit.pileup.bed", SRR="SRR8427224"),
 rule ref_index:
     input:
                 config["reference_genome"]
@@ -609,6 +609,7 @@ rule biscuit_align:
                 ref_index = expand(config["reference_genome"]+"{suffix}", suffix=[".bis.amb",".bis.ann",".bis.pac",".dau.bwt",".dau.sa",".par.bwt",".par.sa"]),
     params:
                 tempdir = "analysis/epi_marks/{SRR}.temp_dir",
+                sample = "{SRR}"
     output:
                 # split and discordant SAMs and heavily clipped reads
                 # clipped = "analysis/epi_marks/{SRR}.clipped.fastq",
@@ -628,7 +629,7 @@ rule biscuit_align:
                 name =      "biscuit_map.{SRR}",
     shell:
                 """
-                biscuit align -b 1 -R "my_RG" -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
+                biscuit align -b 1 -R "@RG_{params.sample}" -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
                 samblaster 2>> {log} |\
                 samtools sort -@ {resources.threads} -o {output.bam} -O BAM - 2>> {log}
 
