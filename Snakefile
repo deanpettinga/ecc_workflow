@@ -629,7 +629,7 @@ rule biscuit_align:
                 name =      "biscuit_map.{SRR}",
     shell:
                 """
-                biscuit align -b 1 -R "@RG_{params.sample}" -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
+                biscuit align -b 1 -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
                 samblaster 2>> {log} |\
                 samtools sort -@ {resources.threads} -o {output.bam} -O BAM - 2>> {log}
 
