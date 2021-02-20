@@ -9,6 +9,7 @@ analysis/ecc_caller/mapfile
 analysis/ecc_caller/*
 analysis/epi_marks/
 !analysis/epi_marks/*.chromsizes
+analysis/homer/*
 
 analysis/R/circles.collapsed.*
 analysis/R/eccDNA-analysis.html

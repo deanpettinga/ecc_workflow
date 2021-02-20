@@ -3,5 +3,7 @@ channels:
   - bioconda
 dependencies:
   - ucsc-bedgraphtobigwig
+  - bedtools
   - samtools
   - wget
+  - gawk

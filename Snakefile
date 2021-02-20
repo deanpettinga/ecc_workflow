@@ -14,91 +14,86 @@ rule all:
     input:
                 # # ref_index:
                 # expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
+                # config["reference_genome"]+".fai",
                 # # trim_galore
-                # expand("analysis/trim_galore/{units.sample}-R1_val_1.fq.gz", units=units.itertuples()),
                 # expand("analysis/trim_galore/{units.sample}-R1_val_1_fastqc.html", units=units.itertuples()),
-                # expand("analysis/trim_galore/{units.sample}-R1_val_1_fastqc.zip", units=units.itertuples()),
-                # expand("analysis/trim_galore/{units.sample}-R1.fastq.gz_trimming_report.txt", units=units.itertuples()),
-                # expand("analysis/trim_galore/{units.sample}-R2_val_2.fq.gz", units=units.itertuples()),
-                # expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.html", units=units.itertuples()),
                 # expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.zip", units=units.itertuples()),
-                # expand("analysis/trim_galore/{units.sample}-R2.fastq.gz_trimming_report.txt", units=units.itertuples()),
-                # # align
-                # expand("analysis/align/{units.sample}.nameSorted.bam", units=units.itertuples()),
-                # expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
-                # expand("analysis/align/{units.sample}.coordSorted.bam.bai", units=units.itertuples()),
-                # # # align_stats
+                # # align_stats
                 # expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
-                # # circleMap_Repeats
-                # expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
-                # circleMap_ReadExtractor
-                # expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.unsorted.bam", units=units.itertuples()),
-                # expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam", units=units.itertuples()),
-                # expand("analysis/circleMap_Realign/{units.sample}.circular_read_candidates.coordSorted.bam.bai", units=units.itertuples()),
-                # circleMap_Realign
-                # expand("analysis/circleMap_Realign/{units.sample}.circles.bed", units=units.itertuples()),
-                # getfasta
-                # expand("analysis/R/circles.collapsed.{condition}.fa", condition=["IF","RC"]),
-                # multiqc
+                # # multiqc
                 # "analysis/multiqc/multiqc_report.html",
                 # "analysis/multiqc/multiqc_report_data/multiqc.log",
                 # "analysis/multiqc/multiqc_report_data/multiqc_cutadapt.txt",
                 # "analysis/multiqc/multiqc_report_data/multiqc_fastqc.txt",
                 # "analysis/multiqc/multiqc_report_data/multiqc_general_stats.txt",
                 # "analysis/multiqc/multiqc_report_data/multiqc_sources.txt",
-                # QC
+                # ## QC --------------------------------------------------------
                 # # align magnaporthe
                 # expand("analysis/align/{units.sample}.coordSorted.magna.bam", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.magna.bam.bai", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.magna.bam.stats", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.magna.bam.idxstats", units=units.itertuples()),
                 # expand("analysis/align/{units.sample}.coordSorted.magna.bam.flagstat", units=units.itertuples()),
-                # plotPCA
+                # # plotPCA
                 # "analysis/deeptools/multiBamSummary.pca.png",
-                # ecc_caller_createMapfile
+                # ## ECC_CALLER ------------------------------------------------
+                # # ecc_caller_createMapfile
                 # "analysis/ecc_caller/mapfile",
-                # ecc_caller_align
+                # # ecc_caller_align
                 # expand("analysis/ecc_caller/{units.sample}.filtered.sorted.bam", units=units.itertuples()),
-                # call_ecc_regions
+                # # call_ecc_regions
                 # expand("analysis/ecc_caller/{units.sample}.confirmedsplitreads.bed", units=units.itertuples()),
-                # assign_confidence
+                # # assign_confidence
                 # expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.tsv", units=units.itertuples()),
-                # filter_by_conf
-                expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.conf.tsv", units=units.itertuples()),
-                expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.conf.bed", units=units.itertuples()),
-                # merge_tech_reps
-                expand("analysis/ecc_caller/{treatment}.merged.bed",treatment=["IF","RC"]),
-                # prepare_epi_datasets
-                expand("analysis/epi_marks/{mark}.bw", mark=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
-                # get_fasta_from_bed
-                expand("analysis/meme/{condition}.fa", condition=["RC","IF"]),
-                # plotHeatmap
-                expand("analysis/deeptools/{mark}.epi_marks.mat.gz", mark=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
-                expand("analysis/deeptools/{mark}.epi_marks.heatmap.png", mark=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
-                # get_centromere_bed
-                "refs/Oryza_sativa.IRGSP-1.0.dna.centromere_clones.bed",
-                # get_TE_annotations
-                "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bed",
-                "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bw",
-                # get_wgbs_data
-                # expand("analysis/epi_marks/{SRR}_{read}.fastq", SRR=["SRR8427224"], read=[1,2]),
-                # # biscuit_align
-                # expand("analysis/epi_marks/{SRR}.biscuit.bam", SRR=["SRR8427224"]),
-                # expand("analysis/epi_marks/{SRR}.biscuit.bam.bai", SRR=["SRR8427224"]),
-                # # biscuit_pileup
-                # expand("analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz", SRR=["SRR8427224"]),
-                # biscuit_vcf2bed
-                expand("analysis/epi_marks/{SRR}.biscuit.pileup.bed", SRR="SRR8427224"),
+                # # filter_by_conf
+                # expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.conf.tsv", units=units.itertuples()),
+                # expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.conf.bed", units=units.itertuples()),
+                # # merge_tech_reps
+                # expand("analysis/ecc_caller/{treatment}.merged.bed",treatment=["IF","RC"]),
+                ## HEATMAPS ----------------------------------------------------
+                # # prepare_epi_datasets
+                # expand("analysis/epi_marks/{mark}.bw", mark=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
+                # # get_centromere_bw
+                # "analysis/deeptools/centromeres.heatmap.bw",
+                # # get_TE_bw
+                # "analysis/deeptools/TEs.heatmap.bw",
+                # # get_GC_bw
+                # "analysis/deeptools/50bps.GC.bw",
+                # # plotHeatmap
+                expand("analysis/deeptools/{feature}.heatmap.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
+                ### MOTIF ANALYSIS ---------------------------------------------
+                # homer
+                expand("analysis/homer/{condition}_noCGnorm/knownResults.html", condition=["IF","RC"]),
+                # homer_noCGnorm
+                expand("analysis/homer/{condition}/knownResults.html", condition=["IF","RC"]),
+
+rule download_ref:
+    input:
+    output:
+                gz = temp(config["reference_genome"]+".gz"),
+                ref = config["reference_genome"],
+    log:
+                "logs/download_ref.log",
+    resources:
+                threads =   1,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "download_ref",
+    shell:
+                """
+                wget ftp://ftp.ensemblgenomes.org/pub/plants/release-50/fasta/oryza_sativa/dna//Oryza_sativa.IRGSP-1.0.dna.toplevel.fa.gz {output.gz} -o {log}
+                gunzip {output.gz}
+                """
 rule ref_index:
     input:
-                config["reference_genome"]
+                ancient(config["reference_genome"]),
     output:
                 # bwa index
                 expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
                 # samtools index
-                expand("{ref}.fai", ref=config["reference_genome"]),
+                config["reference_genome"]+".fai"
     log:
                 bwa = expand("logs/ref_index/{ref}.bwa_index.log", ref=config["reference_genome"]),
                 samtools = expand("logs/ref_index/{ref}.samtools_faidx.log", ref=config["reference_genome"]),
@@ -108,10 +103,10 @@ rule ref_index:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "{sample}.ref_index",
+                name =      "ref_index",
     shell:
                 """
-                # Circle-Map indexing
+                # make .fai
                 samtools faidx {input} 2> {log.samtools}
 
                 # aligner indexing
@@ -197,14 +192,14 @@ rule ecc_caller_createMapfile:
                 mem_gb =    64,
                 name =      "ecc_caller_createMapfile",
     shell:
-                "grep '>' {input} | grep chromosome | awk '{{print substr($1,2)}}' 1> {output} 2> {log}"
+                "grep '>' {input} | grep chromosome | awk '{{print substr($1,$2)}}' 1> {output} 2> {log}"
 
 rule ecc_caller_align:
     # ecc_caller step 2: align reads to reference
     input:
                 ref = config["reference_genome"],
-                bwa_index = expand("{ref}.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa"]),
-                samtools_index = expand("{ref}.fai", ref=config["reference_genome"]),
+                ref_index = config["reference_genome"]+".fai",
+                bwa_index = expand(config["reference_genome"]+".{suffix}", suffix=["amb","ann","bwt","pac","sa"]),
                 mapfile = "analysis/ecc_caller/mapfile",
                 R1 = "raw_data/{sample}-R1.fastq",
                 R2 = "raw_data/{sample}-R2.fastq",
@@ -235,7 +230,7 @@ rule ecc_caller_align:
                 &> {log}
                 """
 
-rule call_ecc_regions:
+rule ecc_caller_callEccRegions:
     # ecc_caller step 3: call eccDNAs from alignment
     input:
                 bam = "analysis/ecc_caller/{sample}.filtered.sorted.bam",
@@ -377,7 +372,7 @@ rule merge_bio_reps:
                 awk -v OFS='\t' '{{print $1, $2, $3, $4}}' | sort | uniq > {output.merged}
                 """
 
-# chip datasets
+# chip datasets-----------------------------------------------------------------
 rule prepare_chip_datasets:
     # downloading data from GEO: GSE79033
     # https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE79033
@@ -386,8 +381,8 @@ rule prepare_chip_datasets:
     params:
                 outdir = "analysis/epi_marks/"
     output:
-                bed = expand("analysis/epi_marks/{entry}_rice_leaves.macs14_peaks.bed", entry=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
-                wig = expand("analysis/epi_marks/{entry}_rice_leaves.macs14_treat_afterfiting_all.wig", entry=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
+                bed = expand("analysis/epi_marks/{mark}_rice_leaves.macs14_peaks.bed", mark=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
+                wig = expand("analysis/epi_marks/{mark}_rice_leaves.macs14_treat_afterfiting_all.wig", mark=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
                 # bw = expand("analysis/epi_marks/{entry}_rice_leaves.macs14_treat_afterfiting_all.wig.bw", entry=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
     log:
                 "logs/ecc_caller/prepare_chip_datasets.log"
@@ -419,7 +414,7 @@ rule wig_to_bw:
                 wig = "analysis/epi_marks/{mark}_rice_leaves.macs14_treat_afterfiting_all.wig",
     output:
                 chrRemoved = "analysis/epi_marks/{mark}_rice_leaves.macs14_treat_afterfiting_all.wig.chrRemoved",
-                bw = "analysis/epi_marks/{mark}.bw",
+                bw = "analysis/deeptools/{mark}.bw",
     log:
                 "logs/wig_to_bw/{mark}.wig_to_bw.log",
     resources:
@@ -438,39 +433,14 @@ rule wig_to_bw:
                 wigToBigWig {output.chrRemoved} {input.chromsizes} {output.bw} 2>> {log}
                 """
 
-rule ecc_bed_to_fasta:
-    input:
-                bed = "analysis/ecc_caller/{condition}.merged.bed"
-    params:
-                ref = config["reference_genome"],
-    output:
-                fa = "analysis/meme/{condition}.fa",
-    log:
-                "logs/getfasta/{condition}.getfasta.log"
-    conda:
-                "envs/bedtools.yaml"
-    resources:
-                threads =   1,
-                nodes =     1,
-                mem_gb =    64,
-                name =      "ecc_bed_to_fasta.{condition}",
-    shell:
-                """
-                bedtools getfasta \
-                -fi {params.ref} \
-                -bed {input.bed} \
-                -fo {output.fa} \
-                2> {log}
-                """
-
 rule plotHeatmap:
     # use merged IF/RC regions to compare and contrast with epigenetic marks in heatmap
     input:
                 beds = expand("analysis/ecc_caller/{condition}.merged.bed",condition=["IF","RC"]),
-                mark = "analysis/epi_marks/{mark}.bw",
+                mark = "analysis/deeptools/{mark}.bw",
     output:
-                matrix = "analysis/deeptools/{mark}.epi_marks.mat.gz",
-                heatmap = "analysis/deeptools/{mark}.epi_marks.heatmap.png",
+                matrix = "analysis/deeptools/{mark}.mat.gz",
+                heatmap = "analysis/deeptools/{mark}.heatmap.png",
     log:
                 "logs/plotHeatmap/{mark}.plotHeatmap.log"
     conda:
@@ -479,7 +449,7 @@ rule plotHeatmap:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "plotHeatmap.{mark}",
+                name =      "plotHeatmap",
     shell:
                 """
                 computeMatrix scale-regions \
@@ -498,18 +468,28 @@ rule plotHeatmap:
                 2>> {log}
                 """
 
-rule get_centromere_annotation:
+rule get_centromere_bw:
     # centromeres are annotated in nipponbare here: http://rice.plantbiology.msu.edu/annotation_pseudo_centromeres.shtml
     input:
-                bacs = "refs/Oryza_sativa.IRGSP-1.0.dna.centromere_clones.tsv",
+                ref = config["reference_genome"],
+                ref_fai = config["reference_genome"]+".fai",
+                bacs = config["reference_genome"]+".centromere_clones.tsv",
     output:
                 bac_tiling = "refs/rice_r7_all_tiling_path.gff3",
-                centromere_bed = "refs/Oryza_sativa.IRGSP-1.0.dna.centromere_clones.bed",
+                centromere_bed = config["reference_genome"]+".centromeres.bed",
+                centromere_bdg = temp(config["reference_genome"]+".centromeres.bdg"),
+                centromere_bdg_sorted = temp(config["reference_genome"]+".centromeres.sorted.bdg"),
+                centromere_bdg_sorted_merged = temp(config["reference_genome"]+".centromeres.sorted.merged.bdg"),
+                chrom_sizes = temp(config["reference_genome"]+".chromsizes"),
+                centromere_bw = config["reference_genome"]+"centromeres.bw",
+                centromere_bw_moved = "analysis/deeptools/centromeres.bw",
     resources:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
                 name =      "get_centromere_annotation",
+    conda:
+                "envs/bedgraphtobigwig.yaml",
     shell:
                 """
                 wget -O {output.bac_tiling} http://rice.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/rice_r7_all_tiling_path.gff3
@@ -519,17 +499,37 @@ rule get_centromere_annotation:
                         awk -v OFS='\t' '{{ split($1, a, /Chr/); print a[2], $4, $5, $7, $9}}' \
                         >> {output.centromere_bed}
                     done
+
+                # convert BED to BDG and merge
+                awk -v OFS='\t' '{{print $1,$2,$3,1}}' {output.centromere_bed} > {output.centromere_bdg}
+                echo 'extracted bdg'
+                sort -k1,1 -k2,2n {output.centromere_bdg} > {output.centromere_bdg_sorted}
+                bedtools merge -i {output.centromere_bdg_sorted} -c 1 -o count > {output.centromere_bdg_sorted_merged}
+                echo 'bedgraph converted.'
+
+                # make chrom.sizes
+                cut -f1,2 {input.ref_fai} | awk -v FS='\t' -v OFS='\t' '{{gsub(/chr/,""); print}}' > {output.chrom_sizes}
+                echo 'chrom.sizes made'
+                cat {output.chrom_sizes}
+
+                # bedgraph to bw
+                bedGraphToBigWig {output.centromere_bdg_sorted_merged} {output.chrom_sizes} {output.centromere_bw}
+                cp {output.centromere_bw} {output.centromere_bw_moved}
                 """
 
-rule get_TE_annotation:
+rule get_TE_bw:
     input:
                 ref = config["reference_genome"],
+                ref_fai = config["reference_genome"]+".fai",
     output:
-                brief_info = "refs/all.locus_brief_info.7.0",
-                TE_bed = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bed",
-                TE_bedgraph = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bedgraph",
-                chrom_sizes = config["reference_genome"]+".chromsizes",
-                TE_bw = "refs/Oryza_sativa.IRGSP-1.0.dna.TEs.bw",
+                brief_info = temp("refs/all.locus_brief_info.7.0"),
+                TE_bed = config["reference_genome"]+".TEs.bed",
+                TE_bdg = temp(config["reference_genome"]+".TEs.bdg"),
+                TE_bdg_sorted = temp(config["reference_genome"]+".TEs.sorted.bdg"),
+                TE_bdg_sorted_merged = temp(config["reference_genome"]+".TEs.sorted.merged.bdg"),
+                chrom_sizes = temp(config["reference_genome"]+".chromsizes"),
+                TE_bw = config["reference_genome"]+"TEs.bw",
+                TE_bw_moved = "analysis/deeptools/TEs.bw",
     resources:
                 threads =   1,
                 nodes =     1,
@@ -539,103 +539,227 @@ rule get_TE_annotation:
                 "envs/bedgraphtobigwig.yaml",
     shell:
                 """
-                # make bed
                 wget -O {output.brief_info} http://rice.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/all.locus_brief_info.7.0
-                awk -v FS='\t' -v OFS='\t' '{{gsub(/Chr/,""); if ($7 == "Y") print $1, $4, $5, $2, "-", $6, $10}}' {output.brief_info} > {output.TE_bed}
+                awk -v FS='\t' -v OFS='\t' '{{gsub(/Chr/,""); if ($7 == "Y") print $1, $4, $5, $2, "-", $6, $10}}' {output.brief_info} |\
+                awk -F'\t|,' -v OFS='\t' '{{for(i=1;i<=NF;i++){{printf "%s\t", $i}}; printf "\n"}}' > {output.TE_bed}
+                echo 'refs/all.locus_brief_info.7.0 downloaded.'
 
-                # bed to bedgraph
-                awk '{{printf "%s\t%d\t%d\t%2.3f\n" , $1,$2,$3,1}}' {output.TE_bed} |\
-                sort -k1,1 -k2,2n - > {output.TE_bedgraph}
+                # bed to bedgraph and merge
+                awk -v OFS='\t' '{{print $1,$2,$3,1}}' {output.TE_bed} > {output.TE_bdg}
+                echo 'extracted bdg'
+                sort -k1,1 -k2,2n {output.TE_bdg} > {output.TE_bdg_sorted}
+                bedtools merge -i {output.TE_bdg_sorted} -c 1 -o count > {output.TE_bdg_sorted_merged}
+                echo 'bedgraph converted.'
 
                 # make chrom.sizes
-                samtools faidx {input.ref}
-                cut -f1,2 {input.ref}.fai > {output.chrom_sizes}
+                cut -f1,2 {input.ref_fai} | awk -v FS='\t' -v OFS='\t' '{{gsub(/chr/,""); print}}' > {output.chrom_sizes}
+                echo 'chrom.sizes made'
+                cat {output.chrom_sizes}
 
                 # bedgraph to bw
-                bedGraphToBigWig {output.TE_bedgraph} {output.chrom_sizes} {output.TE_bw}
+                bedGraphToBigWig {output.TE_bdg_sorted_merged} {output.chrom_sizes} {output.TE_bw}
+                cp {output.TE_bw} {output.TE_bw_moved}
                 """
 
-### Methylation Analysis ###
-
-rule get_wgbs_reads:
-    # download reads from SRA
+rule get_GC_bw:
     input:
+                ref = config["reference_genome"],
+                ref_fai = config["reference_genome"]+".fai",
     params:
-                sra = "{SRR}",
-                outdir = "analysis/epi_marks/",
+                width = "{width}",
     output:
-                sra = temp("analysis/epi_marks/{SRR}/{SRR}.sra"),
-                R1 = "analysis/epi_marks/{SRR}_1.fastq",
-                R2 = "analysis/epi_marks/{SRR}_2.fastq",
-    log:
-                "logs/get_wgbs_reads.{SRR}.log"
-    conda:
-                "envs/wgbs.yaml",
+                chrom_sizes = temp(config["reference_genome"]+".{width}.chromsizes"),
+                width_bed = temp(config["reference_genome"]+".{width}bps.bed"),
+                GC_bdg = temp(config["reference_genome"]+".{width}bps.GC.bdg"),
+                GC_bdg_sorted = config["reference_genome"]+".{width}bps.GC.sorted.bdg",
+                GC_bw = config["reference_genome"]+".{width}bps.GC.bw",
+                GC_bw_deeptools = "analysis/deeptools/{width}bps.GC.bw",
     resources:
                 threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "get_wgbs_reads.{SRR}",
-    shell:
-                """
-                prefetch -O {params.outdir} {params.sra} > {log}
-                fastq-dump --outdir {params.outdir} --split-files {output.sra}
-                """
-
-rule biscuit_index:
-    input:
-                ref = config["reference_genome"],
-    output:
-                expand(config["reference_genome"]+"{suffix}", suffix=[".bis.amb",".bis.ann",".bis.pac",".dau.bwt",".dau.sa",".par.bwt",".par.sa"]),
-    log:
-                "logs/biscuit_index.log"
+                name =      "get_GC",
     conda:
-                "envs/wgbs.yaml",
-    resources:
-                threads =   1,
-                nodes =     1,
-                mem_gb =    64,
-                name =      "biscuit_prep",
+                "envs/bedgraphtobigwig.yaml",
     shell:
                 """
-                biscuit index {input.ref} 2> {log}
+                # make chromsizes
+                cut -f1,2 {input.ref_fai} > {output.chrom_sizes}
+
+                # create a BED file with windows of wished width
+                bedtools makewindows \
+                	-g {output.chrom_sizes} \
+                	-w {params.width} \
+                	> {output.width_bed}
+
+                # compute GC with bedtools
+                bedtools nuc \
+	                   -fi {input.ref} \
+	                   -bed {output.width_bed} |\
+                # pipe into gawk to reformat as BDG
+                gawk -v w={params.width} 'BEGIN{{FS="\t"; OFS="\t"}} \
+                    {{if (FNR>1) {{print $1,$2,$3,$5}}}}' \
+                    > {output.GC_bdg}
+
+                sort -k1,1 -k2,2n {output.GC_bdg} > {output.GC_bdg_sorted}
+
+                # convert BED/BDG to BigWig format
+                bedGraphToBigWig {output.GC_bdg_sorted} {output.chrom_sizes} {output.GC_bw}
+                cp {output.GC_bw} {output.GC_bw_deeptools}
                 """
 
-rule biscuit_align:
+### Motif Analysis -------------------------------------------------------------
+
+rule homer:
     input:
-                R1 = "analysis/epi_marks/{SRR}_1.fastq",
-                R2 = "analysis/epi_marks/{SRR}_2.fastq",
-                ref = config["reference_genome"],
-                ref_index = expand(config["reference_genome"]+"{suffix}", suffix=[".bis.amb",".bis.ann",".bis.pac",".dau.bwt",".dau.sa",".par.bwt",".par.sa"]),
+                bed = ancient("analysis/ecc_caller/{condition}.merged.bed"),
+                motif = ancient("bin/my_motifs.motif"),
     params:
-                tempdir = "analysis/epi_marks/{SRR}.temp_dir",
-                sample = "{SRR}"
+                ref = config["reference_genome"],
+                size = "given",
     output:
-                # split and discordant SAMs and heavily clipped reads
-                # clipped = "analysis/epi_marks/{SRR}.clipped.fastq",
-                # disc = "analysis/epi_marks/{SRR}.disc.sam",
-                # split = "analysis/epi_marks/{SRR}.split.sam",
-                # duplicate marked, sorted, indexed bam
-                bam = "analysis/epi_marks/{SRR}.biscuit.bam",
-                bai = "analysis/epi_marks/{SRR}.biscuit.bam.bai",
+                homer_bed = "analysis/homer/{condition}/{condition}.homer.bed",
+                dir = directory("analysis/homer/{condition}"),
+                html = "analysis/homer/{condition}/knownResults.html",
     log:
-                "logs/biscuit_alig.{SRR}.log",
+                "logs/homer/{condition}.homer.log",
     conda:
-                "envs/wgbs.yaml",
+                "envs/homer.yaml",
     resources:
                 threads =   20,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "biscuit_map.{SRR}",
+                name =      "homer",
     shell:
                 """
-                biscuit align -b 1 -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
-                samblaster 2>> {log} |\
-                samtools sort -@ {resources.threads} -o {output.bam} -O BAM - 2>> {log}
+                awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
-                samtools index {output.bam} 2>> {log}
+                findMotifsGenome.pl \
+                    {output.homer_bed}  \       # position file
+                    {params.ref} \              # genome
+                    {output.dir} \              # output directory
+                    -size {params.size} \       # region size: "given" uses full seq.
+                    -mknown {input.motif} \     # check these motifs
+                    -p {resources.threads} \    # n processors
+                    2> {log}
                 """
 
+rule homer_noCGnorm:
+    input:
+                bed = ancient("analysis/ecc_caller/{condition}.merged.bed"),
+                motif = ancient("bin/my_motifs.motif"),
+    params:
+                ref = config["reference_genome"],
+                size = "given",
+    output:
+                homer_bed = "analysis/homer/{condition}_noCGnorm/{condition}_noCGnorm.homer.bed",
+                dir = directory("analysis/homer/{condition}_noCGnorm"),
+                html = "analysis/homer/{condition}_noCGnorm/knownResults.html",
+    log:
+                "logs/homer/{condition}_noCGnorm.homer.log",
+    conda:
+                "envs/homer.yaml",
+    resources:
+                threads =   20,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "homer_noCGnorm",
+    shell:
+                """
+                awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
+
+                findMotifsGenome.pl \
+                    {output.homer_bed}  \       # position file
+                    {params.ref} \              # genome
+                    {output.dir} \              # output directory
+                    -size {params.size} \       # region size: "given" uses full seq.
+                    -noweight \
+                    -mknown {input.motif} \     # check these motifs
+                    -p {resources.threads} \    # n processors
+                    2> {log}
+                """
+
+### Methylation Analysis -------------------------------------------------------
+
+# rule get_wgbs_reads:
+#     # download reads from SRA
+#     input:
+#     params:
+#                 sra = "{SRR}",
+#                 outdir = "analysis/epi_marks/",
+#     output:
+#                 sra = temp("analysis/epi_marks/{SRR}/{SRR}.sra"),
+#                 R1 = "analysis/epi_marks/{SRR}_1.fastq",
+#                 R2 = "analysis/epi_marks/{SRR}_2.fastq",
+#     log:
+#                 "logs/get_wgbs_reads.{SRR}.log"
+#     conda:
+#                 "envs/wgbs.yaml",
+#     resources:
+#                 threads =   1,
+#                 nodes =     1,
+#                 mem_gb =    64,
+#                 name =      "get_wgbs_reads",
+#     shell:
+#                 """
+#                 prefetch -O {params.outdir} {params.sra} > {log}
+#                 fastq-dump --outdir {params.outdir} --split-files {output.sra}
+#                 """
+#
+# rule biscuit_index:
+#     input:
+#                 ref = config["reference_genome"],
+#     output:
+#                 expand(config["reference_genome"]+"{suffix}", suffix=[".bis.amb",".bis.ann",".bis.pac",".dau.bwt",".dau.sa",".par.bwt",".par.sa"]),
+#     log:
+#                 "logs/biscuit_index.log"
+#     conda:
+#                 "envs/wgbs.yaml",
+#     resources:
+#                 threads =   1,
+#                 nodes =     1,
+#                 mem_gb =    64,
+#                 name =      "biscuit_prep",
+#     shell:
+#                 """
+#                 biscuit index {input.ref} 2> {log}
+#                 """
+#
+# rule biscuit_align:
+#     input:
+#                 R1 = "analysis/epi_marks/{SRR}_1.fastq",
+#                 R2 = "analysis/epi_marks/{SRR}_2.fastq",
+#                 ref = config["reference_genome"],
+#                 ref_index = expand(config["reference_genome"]+"{suffix}", suffix=[".bis.amb",".bis.ann",".bis.pac",".dau.bwt",".dau.sa",".par.bwt",".par.sa"]),
+#     params:
+#                 tempdir = "analysis/epi_marks/{SRR}.temp_dir",
+#                 sample = "{SRR}"
+#     output:
+#                 # split and discordant SAMs and heavily clipped reads
+#                 # clipped = "analysis/epi_marks/{SRR}.clipped.fastq",
+#                 # disc = "analysis/epi_marks/{SRR}.disc.sam",
+#                 # split = "analysis/epi_marks/{SRR}.split.sam",
+#                 # duplicate marked, sorted, indexed bam
+#                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
+#                 bai = "analysis/epi_marks/{SRR}.biscuit.bam.bai",
+#     log:
+#                 "logs/biscuit_alig.{SRR}.log",
+#     conda:
+#                 "envs/wgbs.yaml",
+#     resources:
+#                 threads =   20,
+#                 nodes =     1,
+#                 mem_gb =    64,
+#                 name =      "biscuit_map.{SRR}",
+#     shell:
+#                 """
+#                 biscuit align -b 1 -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
+#                 samblaster 2>> {log} |\
+#                 samtools sort -@ {resources.threads} -o {output.bam} -O BAM - 2>> {log}
+#
+#                 samtools index {output.bam} 2>> {log}
+#                 """
+#
 # rule biscuit_qc:
 #     input:
 #                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
@@ -657,57 +781,56 @@ rule biscuit_align:
 #     shell:
 #                 """
 #                 """
-
-rule biscuit_pileup:
-    input:
-                bam = "analysis/epi_marks/{SRR}.biscuit.bam",
-                bai = "analysis/epi_marks/{SRR}.biscuit.bam.bai",
-                ref = config["reference_genome"],
-    output:
-                vcf = temp("analysis/epi_marks/{SRR}.biscuit.pileup.vcf"),
-                vcf_gz = "analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz",
-    log:
-                "logs/biscuit_pileup.{SRR}.log"
-    conda:
-                "envs/wgbs.yaml",
-    resources:
-                threads =   20,
-                nodes =     1,
-                mem_gb =    64,
-                name =      "biscuit_pileup.{SRR}",
-    shell:
-                """
-                biscuit pileup \
-                -v 1 \
-                -q {resources.threads} \
-                -o {output.vcf} \
-                {input.ref} {input.bam} 2> {log}
-
-                bgzip {output.vcf}
-                tabix -p vcf {output.vcf_gz}
-                """
-
-rule biscuit_vcf2bed:
-    input:
-                vcf_gz = "analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz",
-    params:
-                t = "cg",
-    output:
-                bed = "analysis/epi_marks/{SRR}.biscuit.pileup.bed"
-    log:
-                "logs/biscuit_pileup.{SRR}.log"
-    conda:
-                "envs/wgbs.yaml",
-    resources:
-                threads =   20,
-                nodes =     1,
-                mem_gb =    64,
-                name =      "biscuit_bed.{SRR}",
-    shell:
-                """
-                biscuit vcf2bed -t {params.t} {input.vcf_gz} > {output.bed}
-                """
-
+# 
+# rule biscuit_pileup:
+#     input:
+#                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
+#                 bai = "analysis/epi_marks/{SRR}.biscuit.bam.bai",
+#                 ref = config["reference_genome"],
+#     output:
+#                 vcf = temp("analysis/epi_marks/{SRR}.biscuit.pileup.vcf"),
+#                 vcf_gz = "analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz",
+#     log:
+#                 "logs/biscuit_pileup.{SRR}.log"
+#     conda:
+#                 "envs/wgbs.yaml",
+#     resources:
+#                 threads =   20,
+#                 nodes =     1,
+#                 mem_gb =    64,
+#                 name =      "biscuit_pileup.{SRR}",
+#     shell:
+#                 """
+#                 biscuit pileup \
+#                 -v 1 \
+#                 -q {resources.threads} \
+#                 -o {output.vcf} \
+#                 {input.ref} {input.bam} 2> {log}
+#
+#                 bgzip {output.vcf}
+#                 tabix -p vcf {output.vcf_gz}
+#                 """
+#
+# rule biscuit_vcf2bed:
+#     input:
+#                 vcf_gz = "analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz",
+#     params:
+#                 t = "cg",
+#     output:
+#                 bed = "analysis/epi_marks/{SRR}.biscuit.pileup.bed"
+#     log:
+#                 "logs/biscuit_pileup.{SRR}.log"
+#     conda:
+#                 "envs/wgbs.yaml",
+#     resources:
+#                 threads =   20,
+#                 nodes =     1,
+#                 mem_gb =    64,
+#                 name =      "biscuit_bed.{SRR}",
+#     shell:
+#                 """
+#                 biscuit vcf2bed -t {params.t} {input.vcf_gz} > {output.bed}
+#                 """
 #
 # rule plotPCA:
 #     input:
@@ -800,7 +923,6 @@ rule biscuit_vcf2bed:
 #                     -n multiqc_report.html \
 #                     2> {log}
 #                     """
-
 # # QC for suspected contamination
 # # align to magnaporthae to see if it is the source of contamination
 # rule align_magna:
