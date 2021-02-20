@@ -446,13 +446,14 @@ rule plotHeatmap:
     conda:
                 "envs/deeptools.yaml"
     resources:
-                threads =   1,
+                threads =   20,
                 nodes =     1,
                 mem_gb =    64,
                 name =      "plotHeatmap",
     shell:
                 """
                 computeMatrix scale-regions \
+                -p {resources.threads} \
                 -S {input.mark} \
                 -R {input.beds} \
                 --beforeRegionStartLength 3000 \
@@ -781,7 +782,7 @@ rule homer_noCGnorm:
 #     shell:
 #                 """
 #                 """
-# 
+#
 # rule biscuit_pileup:
 #     input:
 #                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
