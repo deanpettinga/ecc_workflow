@@ -638,12 +638,12 @@ rule homer:
                 awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
                 findMotifsGenome.pl \
-                {output.homer_bed} \        # position file
-                {params.ref} \              # genome
-                {output.dir} \              # output directory
-                -size {params.size} \       # region size: "given" uses full seq.
-                -mknown {input.motif} \     # check these motifs
-                -p {resources.threads} \    # n processors
+                {output.homer_bed} \
+                {params.ref} \
+                {output.dir} \
+                -size {params.size} \
+                -mknown {input.motif} \
+                -p {resources.threads} \
                 2>> {log}
                 """
 
@@ -669,18 +669,18 @@ rule homer_noCGnorm:
                 name =      "homer_noCGnorm",
     shell:
                 """
-                [ ! -d {output.dir}] && mkdir -p {output.dir}
+                [ ! -d {output.dir} ] && mkdir -p {output.dir}
 
                 awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
                 findMotifsGenome.pl \
-                {output.homer_bed}  \       # position file
-                {params.ref} \              # genome
-                {output.dir} \              # output directory
-                -size {params.size} \       # region size
+                {output.homer_bed}  \
+                {params.ref} \
+                {output.dir} \
+                -size {params.size} \
                 -noweight \
-                -mknown {input.motif} \     # check these motifs
-                -p {resources.threads} \    # n processors
+                -mknown {input.motif} \
+                -p {resources.threads} \
                 2>> {log}
                 """
 
