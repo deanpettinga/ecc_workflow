@@ -617,7 +617,7 @@ rule homer:
                 motif = ancient("bin/my_motifs.motif"),
     params:
                 ref = config["reference_genome"],
-                size = "given",
+                size = "given", # 'given' uses to the full sequence provided
     output:
                 homer_bed = "analysis/homer/{condition}/{condition}.homer.bed",
                 dir = directory("analysis/homer/{condition}"),
@@ -633,6 +633,13 @@ rule homer:
                 name =      "homer",
     shell:
                 """
+                if [ -d {output.dir} ]; then
+                    echo "{output.dir} exists already." > {log};
+                else
+                    echo "creating directory {output.dir}." > {log};
+                    mkdir -p {output.dir};
+                fi
+
                 awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
                 findMotifsGenome.pl \
@@ -642,7 +649,7 @@ rule homer:
                     -size {params.size} \       # region size: "given" uses full seq.
                     -mknown {input.motif} \     # check these motifs
                     -p {resources.threads} \    # n processors
-                    2> {log}
+                    2>> {log}
                 """
 
 rule homer_noCGnorm:
@@ -651,7 +658,7 @@ rule homer_noCGnorm:
                 motif = ancient("bin/my_motifs.motif"),
     params:
                 ref = config["reference_genome"],
-                size = "given",
+                size = "given", # 'given' uses to the full sequence provided
     output:
                 homer_bed = "analysis/homer/{condition}_noCGnorm/{condition}_noCGnorm.homer.bed",
                 dir = directory("analysis/homer/{condition}_noCGnorm"),
@@ -667,17 +674,24 @@ rule homer_noCGnorm:
                 name =      "homer_noCGnorm",
     shell:
                 """
+                if [ -d {output.dir} ]; then
+                    echo "{output.dir} exists already." > {log};
+                else
+                    echo "creating directory {output.dir}." > {log};
+                    mkdir -p {output.dir};
+                fi
+
                 awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
                 findMotifsGenome.pl \
                     {output.homer_bed}  \       # position file
                     {params.ref} \              # genome
                     {output.dir} \              # output directory
-                    -size {params.size} \       # region size: "given" uses full seq.
+                    -size {params.size} \       # region size
                     -noweight \
                     -mknown {input.motif} \     # check these motifs
                     -p {resources.threads} \    # n processors
-                    2> {log}
+                    2>> {log}
                 """
 
 ### Methylation Analysis -------------------------------------------------------
