@@ -541,8 +541,7 @@ rule get_TE_bw:
     shell:
                 """
                 wget -O {output.brief_info} http://rice.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_7.0/all.dir/all.locus_brief_info.7.0
-                awk -v FS='\t' -v OFS='\t' '{{gsub(/Chr/,""); if ($7 == "Y") print $1, $4, $5, $2, "-", $6, $10}}' {output.brief_info} |\
-                awk -F'\t|,' -v OFS='\t' '{{for(i=1;i<=NF;i++){{printf "%s\t", $i}}; printf "\n"}}' > {output.TE_bed}
+                awk -v FS='\t' -v OFS='\t' '{{gsub(/Chr/,""); if ($7 == "Y") print $1, $4, $5, $2, "-", $6, $10}}' {output.brief_info} > {output.TE_bed}
                 echo 'refs/all.locus_brief_info.7.0 downloaded.'
 
                 # bed to bedgraph and merge
