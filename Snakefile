@@ -633,12 +633,7 @@ rule homer:
                 name =      "homer",
     shell:
                 """
-                if [ -d {output.dir} ]; then
-                    echo "{output.dir} exists already." > {log};
-                else
-                    echo "creating directory {output.dir}." > {log};
-                    mkdir -p {output.dir};
-                fi
+                [! -d {output.dir}] && mkdir -p {output.dir}
 
                 awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
@@ -674,12 +669,7 @@ rule homer_noCGnorm:
                 name =      "homer_noCGnorm",
     shell:
                 """
-                if [ -d {output.dir} ]; then
-                    echo "{output.dir} exists already." > {log};
-                else
-                    echo "creating directory {output.dir}." > {log};
-                    mkdir -p {output.dir};
-                fi
+                [! -d {output.dir}] && mkdir -p {output.dir}
 
                 awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
