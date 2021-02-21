@@ -669,7 +669,7 @@ rule homer_noCGnorm:
                 name =      "homer_noCGnorm",
     shell:
                 """
-                [! -d {output.dir}] && mkdir -p {output.dir}
+                [ ! -d {output.dir}] && mkdir -p {output.dir}
 
                 awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
 
