@@ -387,7 +387,7 @@ rule samtools_flagstat:
 
 rule multiqc:
     input:
-                flagstat = "analysis/ecc_caller/{sample}.filtered.sorted.bam.flagstat",
+                expand("analysis/ecc_caller/{units.sample}.filtered.sorted.bam.flagstat", units=units.itertuples()),
     params:
                 "analysis/ecc_caller/",
     output:
