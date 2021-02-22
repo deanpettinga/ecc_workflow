@@ -37,6 +37,8 @@
   * Snakemake identifies the jobs to be run by designing a diacyclic graph from the bottom-up using the desire output requested by the user in `/Snakefile`.
     - the first *rule* is a special one called `rule all:`. Here, the user specifies all the desired outputs under the directive called `input:`.
     - in my workflow, the outputs from each of the rules seen below `rule all:` the output from each intermediate rule leading to the final output have been listed for clarity, but commented out as they are not explicitly requested. Snakemake is able to automatically determine the dependencies between rules by matching file names. read more about it in the documentation [example workflow](https://snakemake.readthedocs.io/en/stable/tutorial/basics.html).
+
+### Running the workflow
     - To see which jobs will be queued, activate your snakemake environment perform a dry-run at the base of the repo:
       ```
       # activate snakemake conda environment

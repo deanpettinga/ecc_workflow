@@ -65,8 +65,6 @@ rule all:
                 expand("analysis/deeptools/{feature}.heatmap.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
                 ### MOTIF ANALYSIS ---------------------------------------------
                 # homer
-                expand("analysis/homer/{condition}_noCGnorm/knownResults.html", condition=["IF","RC"]),
-                # homer_noCGnorm
                 expand("analysis/homer/{condition}/knownResults.html", condition=["IF","RC"]),
 
 rule download_ref:
@@ -369,7 +367,46 @@ rule merge_bio_reps:
                 # now merge them.
                 cat {output.temp1_2} {output.temp2_3} {output.temp1_3} |
                 # and select only the first 4 columns
-                awk -v OFS='\t' '{{print $1, $2, $3, $4}}' | sort | uniq > {output.merged}
+                awk -v OFS='\t' '{{print $1, $2, $3}}' | sort | uniq > {output.merged}
+                """
+
+rule samtools_flagstat:
+    input:
+                bam = "analysis/ecc_caller/{sample}.filtered.sorted.bam",
+    output:
+                flagstat = "analysis/ecc_caller/{sample}.filtered.sorted.bam.flagstat",
+    resources:
+                threads =   1,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "samtools_flagstat",
+    conda:
+                "envs/samtools.yaml",
+    shell:
+                "samtools flagstat {input.bam} > {output.flagstat}"
+
+rule multiqc:
+    input:
+                flagstat = "analysis/ecc_caller/{sample}.filtered.sorted.bam.flagstat",
+    params:
+                "analysis/ecc_caller/",
+    output:
+                "analysis/multiqc/multiqc_report.html",
+    log:
+                "logs/multiqc.log"
+    resources:
+                threads =   1,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "multiqc",
+    conda:
+                "envs/multiqc.yaml",
+    shell:
+                """
+                multiqc -f {params} \
+                -o analysis/multiqc \
+                -n multiqc_report.html \
+                2> {log}
                 """
 
 # chip datasets-----------------------------------------------------------------
@@ -529,7 +566,7 @@ rule get_TE_bw:
                 TE_bdg_sorted = temp(config["reference_genome"]+".TEs.sorted.bdg"),
                 TE_bdg_sorted_merged = temp(config["reference_genome"]+".TEs.sorted.merged.bdg"),
                 chrom_sizes = temp(config["reference_genome"]+".chromsizes"),
-                TE_bw = config["reference_genome"]+"TEs.bw",
+                TE_bw = config["reference_genome"]+".TEs.bw",
                 TE_bw_moved = "analysis/deeptools/TEs.bw",
     resources:
                 threads =   1,
@@ -646,196 +683,44 @@ rule homer:
                 2>> {log}
                 """
 
-rule homer_noCGnorm:
+rule extract_ARS_details:
     input:
-                bed = ancient("analysis/ecc_caller/{condition}.merged.bed"),
-                motif = ancient("bin/my_motifs.motif"),
-    params:
                 ref = config["reference_genome"],
-                size = "given", # 'given' uses to the full sequence provided
+                bed = "analysis/ecc_caller/{condition}.merged.bed",
+    params:
+                conf_tsv = "analysis/ecc_caller/{condition}_*.ecccaller_output.renamed.details.conf.tsv",
     output:
-                homer_bed = "analysis/homer/{condition}_noCGnorm/{condition}_noCGnorm.homer.bed",
-                dir = directory("analysis/homer/{condition}_noCGnorm"),
-                html = "analysis/homer/{condition}_noCGnorm/knownResults.html",
+                fa = "analysis/ecc_caller/{condition}.merged.fa",
+                ARS_fa = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.fa",
+                ARS_bed = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.bed",
+                ARS_conf = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf",
     log:
-                "logs/homer/{condition}_noCGnorm.homer.log",
-    conda:
-                "envs/homer.yaml",
+                "logs/extract_ARS_details/{condition}.extract_ARS_details.log",
     resources:
-                threads =   20,
+                threads =   1,
                 nodes =     1,
                 mem_gb =    64,
-                name =      "homer_noCGnorm",
+                name =      "extract_ARS_details",
+    conda:
+                "envs/bedtools.yaml",
     shell:
                 """
-                [ ! -d {output.dir} ] && mkdir -p {output.dir}
+                bedtools getfasta -fi {input.ref} -bed {input.bed} -fo {output.fa} 2> {log}
+                echo "bedtools getfasta COMPLETE." > {log}
 
-                awk -v OFS='\t' '{{print $1, $2, $3, "ecc_"NR}}' {input.bed} > {output.homer_bed}
+                # use grep to extract .fa seqs with ARS motif and write to BED
+                grep -B 1 -e '[AT]TTTA[TT][AG]TTT[AT]' {output.fa} > {output.ARS_fa}
+                echo "ARS-motif.fa extraction COMPLETE." > {log}
+                grep '>' {output.ARS_fa} |\
+                awk -v FS=':|-' -v OFS='\t' '{{gsub(/^>/, ""); print $1, $2, $3}}' > {output.ARS_bed}
+                echo "ARS-motif.bed extraction COMPLETE." > {log}
 
-                findMotifsGenome.pl \
-                {output.homer_bed}  \
-                {params.ref} \
-                {output.dir} \
-                -size {params.size} \
-                -noweight \
-                -mknown {input.motif} \
-                -p {resources.threads} \
-                2>> {log}
+                # now get the ecc_caller details from whichever technical rep called
+                # this exact eccDNA. these files contain the number of split reads.
+                grep -f {output.ARS_bed} {params.conf_tsv} |  awk -v FS=':' -v OFS='\t' '{{gsub(/\.ecccaller_output\.renamed.details\.conf\.tsv/, ""); print $1, $2}}' > {output.ARS_conf}
+                echo "ARS-motif.conf extraction COMPLETE." > {log}
                 """
 
-### Methylation Analysis -------------------------------------------------------
-
-# rule get_wgbs_reads:
-#     # download reads from SRA
-#     input:
-#     params:
-#                 sra = "{SRR}",
-#                 outdir = "analysis/epi_marks/",
-#     output:
-#                 sra = temp("analysis/epi_marks/{SRR}/{SRR}.sra"),
-#                 R1 = "analysis/epi_marks/{SRR}_1.fastq",
-#                 R2 = "analysis/epi_marks/{SRR}_2.fastq",
-#     log:
-#                 "logs/get_wgbs_reads.{SRR}.log"
-#     conda:
-#                 "envs/wgbs.yaml",
-#     resources:
-#                 threads =   1,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "get_wgbs_reads",
-#     shell:
-#                 """
-#                 prefetch -O {params.outdir} {params.sra} > {log}
-#                 fastq-dump --outdir {params.outdir} --split-files {output.sra}
-#                 """
-#
-# rule biscuit_index:
-#     input:
-#                 ref = config["reference_genome"],
-#     output:
-#                 expand(config["reference_genome"]+"{suffix}", suffix=[".bis.amb",".bis.ann",".bis.pac",".dau.bwt",".dau.sa",".par.bwt",".par.sa"]),
-#     log:
-#                 "logs/biscuit_index.log"
-#     conda:
-#                 "envs/wgbs.yaml",
-#     resources:
-#                 threads =   1,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "biscuit_prep",
-#     shell:
-#                 """
-#                 biscuit index {input.ref} 2> {log}
-#                 """
-#
-# rule biscuit_align:
-#     input:
-#                 R1 = "analysis/epi_marks/{SRR}_1.fastq",
-#                 R2 = "analysis/epi_marks/{SRR}_2.fastq",
-#                 ref = config["reference_genome"],
-#                 ref_index = expand(config["reference_genome"]+"{suffix}", suffix=[".bis.amb",".bis.ann",".bis.pac",".dau.bwt",".dau.sa",".par.bwt",".par.sa"]),
-#     params:
-#                 tempdir = "analysis/epi_marks/{SRR}.temp_dir",
-#                 sample = "{SRR}"
-#     output:
-#                 # split and discordant SAMs and heavily clipped reads
-#                 # clipped = "analysis/epi_marks/{SRR}.clipped.fastq",
-#                 # disc = "analysis/epi_marks/{SRR}.disc.sam",
-#                 # split = "analysis/epi_marks/{SRR}.split.sam",
-#                 # duplicate marked, sorted, indexed bam
-#                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
-#                 bai = "analysis/epi_marks/{SRR}.biscuit.bam.bai",
-#     log:
-#                 "logs/biscuit_alig.{SRR}.log",
-#     conda:
-#                 "envs/wgbs.yaml",
-#     resources:
-#                 threads =   20,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "biscuit_map.{SRR}",
-#     shell:
-#                 """
-#                 biscuit align -b 1 -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log} |\
-#                 samblaster 2>> {log} |\
-#                 samtools sort -@ {resources.threads} -o {output.bam} -O BAM - 2>> {log}
-#
-#                 samtools index {output.bam} 2>> {log}
-#                 """
-#
-# rule biscuit_qc:
-#     input:
-#                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
-#                 ref = config["reference_genome"],
-#     params:
-#                 sample = "{SRR}",
-#                 path_to_assets = ""
-#     output:
-#
-#     log:
-#                 "logs/biscuit_map.log"
-#     conda:
-#                 "envs/wgbs.yaml",
-#     resources:
-#                 threads =   1,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "biscuit_map.{SRR}",
-#     shell:
-#                 """
-#                 """
-#
-# rule biscuit_pileup:
-#     input:
-#                 bam = "analysis/epi_marks/{SRR}.biscuit.bam",
-#                 bai = "analysis/epi_marks/{SRR}.biscuit.bam.bai",
-#                 ref = config["reference_genome"],
-#     output:
-#                 vcf = temp("analysis/epi_marks/{SRR}.biscuit.pileup.vcf"),
-#                 vcf_gz = "analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz",
-#     log:
-#                 "logs/biscuit_pileup.{SRR}.log"
-#     conda:
-#                 "envs/wgbs.yaml",
-#     resources:
-#                 threads =   20,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "biscuit_pileup.{SRR}",
-#     shell:
-#                 """
-#                 biscuit pileup \
-#                 -v 1 \
-#                 -q {resources.threads} \
-#                 -o {output.vcf} \
-#                 {input.ref} {input.bam} 2> {log}
-#
-#                 bgzip {output.vcf}
-#                 tabix -p vcf {output.vcf_gz}
-#                 """
-#
-# rule biscuit_vcf2bed:
-#     input:
-#                 vcf_gz = "analysis/epi_marks/{SRR}.biscuit.pileup.vcf.gz",
-#     params:
-#                 t = "cg",
-#     output:
-#                 bed = "analysis/epi_marks/{SRR}.biscuit.pileup.bed"
-#     log:
-#                 "logs/biscuit_pileup.{SRR}.log"
-#     conda:
-#                 "envs/wgbs.yaml",
-#     resources:
-#                 threads =   20,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "biscuit_bed.{SRR}",
-#     shell:
-#                 """
-#                 biscuit vcf2bed -t {params.t} {input.vcf_gz} > {output.bed}
-#                 """
-#
 # rule plotPCA:
 #     input:
 #                 bam = expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
@@ -868,28 +753,7 @@ rule homer_noCGnorm:
 #                 2>> {log}
 #                 """
 #
-# rule eccDNA_analysis_R:
-#     input:
-#                 expand("analysis/circleMap_Repeats/{units.sample}.circleMap_Repeats.bed", units=units.itertuples()),
-#     params:
-#                 Rmd = "analysis/R/eccDNA-analysis.Rmd"
-#     output:
-#                 "analysis/R/eccDNA-analysis.html",
-#                 expand("analysis/R/circles.collapsed.{condition}.bed", condition=["RC","IF"]),
-#     log:
-#                 "logs/R/eccDNA-analysis-R.log"
-#     conda:
-#                 "envs/r.yaml"
-#     resources:
-#                 threads = 1,
-#                 nodes =   1,
-#                 mem_gb =  64,
-#     shell:
-#                 """
-#                 Rscript -e "rmarkdown::render('{params.Rmd}',output_format='html_document')"
-#                 """
-#
-#
+
 # rule multiqc:
 #         input:
 #                     # trim_galore
