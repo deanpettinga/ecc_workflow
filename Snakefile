@@ -64,9 +64,9 @@ rule all:
                 # # get_GC_bw
                 # "analysis/deeptools/50bps.GC.bw",
                 # # plotHeatmap
-                expand("analysis/deeptools/{feature}.heatmap.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
+                expand("analysis/deeptools/{feature}.heatmap.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC","centromeres"]),
                 # # plotProfile
-                expand("analysis/deeptools/both_vs_background.{feature}.profile.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC","centromere"]),
+                expand("analysis/deeptools/both_vs_background.{feature}.profile.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC","centromeres"]),
                 ### MOTIF ANALYSIS ---------------------------------------------
                 # homer
                 expand("analysis/homer/{condition}/knownResults.html", condition=["IF","RC"]),
@@ -519,6 +519,7 @@ rule plotProfile_background:
                 IF_bkg = "analysis/ecc_caller/IF.merged.shuf.bed",
                 RC = "analysis/ecc_caller/RC.merged.bed",
                 RC_bkg = "analysis/ecc_caller/RC.merged.shuf.bed",
+                mark = "analysis/deeptools/{mark}.bw",
     output:
                 matrix = "analysis/deeptools/both_vs_background.{mark}.mat.gz",
                 profile = "analysis/deeptools/both_vs_background.{mark}.profile.png",
