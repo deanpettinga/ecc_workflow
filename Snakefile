@@ -52,6 +52,8 @@ rule all:
                 # expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.conf.bed", units=units.itertuples()),
                 # # merge_tech_reps
                 # expand("analysis/ecc_caller/{treatment}.merged.bed",treatment=["IF","RC"]),
+                # #
+                # expand("analysis/ecc_caller/{condition}.merged.shuf.bed",(treatment=["IF","RC"]),
                 ## HEATMAPS ----------------------------------------------------
                 # # prepare_epi_datasets
                 # expand("analysis/epi_marks/{mark}.bw", mark=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3"]),
@@ -63,9 +65,13 @@ rule all:
                 # "analysis/deeptools/50bps.GC.bw",
                 # # plotHeatmap
                 expand("analysis/deeptools/{feature}.heatmap.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
+                # # plotProfile
+                expand("analysis/deeptools/{condition}_vs_background.{feature}.profile.png", condition=["IF","RC"], feature=["TEs","50bps.GC"]),
                 ### MOTIF ANALYSIS ---------------------------------------------
                 # homer
                 expand("analysis/homer/{condition}/knownResults.html", condition=["IF","RC"]),
+                # ARS
+                expand("analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random{number}", condition=["IF","RC"], number=[1,2,3,4,5,6,7,8,9,10]),
 
 rule download_ref:
     input:
@@ -366,7 +372,7 @@ rule merge_bio_reps:
 
                 # now merge them.
                 cat {output.temp1_2} {output.temp2_3} {output.temp1_3} |
-                # and select only the first 4 columns
+                # and select only the first 3 columns
                 awk -v OFS='\t' '{{print $1, $2, $3}}' | sort | uniq > {output.merged}
                 """
 
@@ -503,6 +509,43 @@ rule plotHeatmap:
                 plotHeatmap \
                 -m {output.matrix} \
                 -out {output.heatmap} \
+                2>> {log}
+                """
+
+rule plotProfile_background:
+    # use merged IF/RC regions to compare and contrast with epigenetic marks in heatmap
+    input:
+                bed = "analysis/ecc_caller/{condition}.merged.bed",
+                bed_bkg = "analysis/ecc_caller/{condition}.merged.shuf.bed",
+                mark = "analysis/deeptools/{mark}.bw",
+    output:
+                matrix = "analysis/deeptools/{condition}_vs_background.{mark}.mat.gz",
+                profile = "analysis/deeptools/{condition}_vs_background.{mark}.profile.png",
+    log:
+                "logs/plotProfile_background/{condition}_vs_background.{mark}.plotProfile_background.log"
+    conda:
+                "envs/deeptools.yaml"
+    resources:
+                threads =   20,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "plotProfile_background",
+    shell:
+                """
+                computeMatrix scale-regions \
+                -p {resources.threads} \
+                -S {input.mark} \
+                -R {input.bed} {input.bed_bkg} \
+                --beforeRegionStartLength 3000 \
+                --regionBodyLength 5000 \
+                --afterRegionStartLength 3000 \
+                --skipZeros \
+                -out {output.matrix} \
+                > {log}
+
+                plotProfile \
+                -m {output.matrix} \
+                -out {output.profile} \
                 2>> {log}
                 """
 
@@ -721,128 +764,62 @@ rule extract_ARS_details:
                 echo "ARS-motif.conf extraction COMPLETE." > {log}
                 """
 
-# rule plotPCA:
-#     input:
-#                 bam = expand("analysis/align/{units.sample}.coordSorted.bam", units=units.itertuples()),
-#     output:
-#                 multiBamSummary = "analysis/deeptools/multiBamSummary.npz",
-#                 pca = "analysis/deeptools/multiBamSummary.pca.png",
-#     log:
-#                 "logs/plotPCA.log"
-#     conda:
-#                 "envs/deeptools.yaml"
-#     resources:
-#                 threads =   8,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "plotPCA",
-#     shell:
-#                 """
-#                 # make output dir if it doesnt exist
-#                 mkdir -p analysis/deeptools
-#                 # compute read coverage for full genome
-#                 multiBamSummary bins -p {resources.threads} \
-#                 --bamfiles {input.bam} \
-#                 --smartLabels \
-#                 --outFileName {output.multiBamSummary} \
-#                 2> {log}
-#
-#                 plotPCA -in {output.multiBamSummary} \
-#                 -o {output.pca} \
-#                 -T "PCA of read counts" \
-#                 2>> {log}
-#                 """
-#
+rule extract_random_eccs:
+    input:
+                ARS_conf = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf",
+                ecc_conf = expand("analysis/ecc_caller/{units.sample}.ecccaller_output.renamed.details.conf.tsv", units=units.itertuples()),
+    params:
+                conf_tsv = "analysis/ecc_caller/{condition}_*.ecccaller_output.renamed.details.conf.tsv",
+                out = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random",
+    output:
+                cat_tmp = temp("analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random.conf.cat_tmp"),
+                random1 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random1",
+                random2 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random2",
+                random3 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random3",
+                random4 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random4",
+                random5 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random5",
+                random6 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random6",
+                random7 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random7",
+                random8 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random8",
+                random9 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random9",
+                random10 = "analysis/ecc_caller/{condition}.merged.fa.ARS-motif.conf.random10",
+    log:
+                "logs/extract_random_eccs.{condition}.log"
+    resources:
+                threads =   1,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "extract_random_regions",
+    shell:
+                """
+                # make tmp file with all detected circles by ecc_caller
+                cat {params.conf_tsv} > {output.cat_tmp}
 
-# rule multiqc:
-#         input:
-#                     # trim_galore
-#                     expand("analysis/trim_galore/{units.sample}-R1_val_1_fastqc.html", units=units.itertuples()),
-#                     expand("analysis/trim_galore/{units.sample}-R2_val_2_fastqc.html", units=units.itertuples()),
-#                     expand("analysis/trim_galore/{units.sample}-R1.fastq.gz_trimming_report.txt", units=units.itertuples()),
-#                     expand("analysis/trim_galore/{units.sample}-R2.fastq.gz_trimming_report.txt", units=units.itertuples()),
-#                     # align_stats
-#                     expand("analysis/align/{units.sample}.coordSorted.bam.stats", units=units.itertuples()),
-#                     expand("analysis/align/{units.sample}.coordSorted.bam.idxstats", units=units.itertuples()),
-#                     expand("analysis/align/{units.sample}.coordSorted.bam.flagstat", units=units.itertuples()),
-#         params:
-#                     "analysis/align/",
-#                     "analysis/trim_galore/",
-#         output:
-#                     "analysis/multiqc/multiqc_report.html",
-#                     "analysis/multiqc/multiqc_report_data/multiqc.log",
-#                     "analysis/multiqc/multiqc_report_data/multiqc_cutadapt.txt",
-#                     "analysis/multiqc/multiqc_report_data/multiqc_fastqc.txt",
-#                     "analysis/multiqc/multiqc_report_data/multiqc_general_stats.txt",
-#                     "analysis/multiqc/multiqc_report_data/multiqc_sources.txt",
-#         log:
-#                     "logs/multiqc/multiqc.log",
-#         conda:
-#                     "envs/multiqc.yaml"
-#         resources:
-#                     threads =   1,
-#                     nodes =     1,
-#                     mem_gb =    64,
-#                     name =      "multiqc"
-#         shell:
-#                     """
-#                     multiqc -f {params} \
-#                     -o analysis/multiqc \
-#                     -n multiqc_report.html \
-#                     2> {log}
-#                     """
-# # QC for suspected contamination
-# # align to magnaporthae to see if it is the source of contamination
-# rule align_magna:
-#     input:
-#                 ref = 'refs/Magnaporthe_oryzae.MG8.dna_sm.toplevel.fa',
-#                 ref_index = expand("refs/Magnaporthe_oryzae.MG8.dna_sm.toplevel.fa.{suffix}", ref=config["reference_genome"], suffix=["amb","ann","bwt","pac","sa","fai"]),
-#                 R1 = "analysis/trim_galore/{sample}-R1_val_1.fq.gz",
-#                 R2 = "analysis/trim_galore/{sample}-R2_val_2.fq.gz",
-#     params:
-#                 tmp = "tmp",
-#     output:
-#                 sam = temp("analysis/align/{sample}.sam.magna"),
-#                 bam_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam",
-#                 bai_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam.bai",
-#     log:
-#                 bwa = "logs/align/{sample}.bwa.magna.log",
-#                 coordSort = "logs/align/{sample}.coordSort.magna.log",
-#                 coordSort_index = "logs/align/{sample}.coordSort_index.magna.log",
-#     conda:
-#                 "envs/circle-map.yaml"
-#     resources:
-#                 threads =   8,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "{sample}.align_magna",
-#     shell:
-#                 """
-#                 # align with bwa mem (to SAM)
-#                 bwa mem -M -q -t {resources.threads} {input.ref} {input.R1} {input.R2} 2> {log.bwa} 1> {output.sam}
-#                 # coordSort the BAM
-#                 samtools sort -T {params.tmp} -O BAM -o {output.bam_coordSorted} {output.sam} 2> {log.coordSort}
-#                 # coordSort index
-#                 samtools index -b -@ {resources.threads} {output.bam_coordSorted} 2> {log.coordSort_index}
-#                 """
-#
-# rule align_magna_stats:
-#     input:
-#                 bam_coordSorted = "analysis/align/{sample}.coordSorted.magna.bam",
-#     output:
-#                 stats = "analysis/align/{sample}.coordSorted.magna.bam.stats",
-#                 idxstats = "analysis/align/{sample}.coordSorted.magna.bam.idxstats",
-#                 flagstat = "analysis/align/{sample}.coordSorted.magna.bam.flagstat",
-#     conda:
-#                 "envs/circle-map.yaml"
-#     resources:
-#                 threads =   1,
-#                 nodes =     1,
-#                 mem_gb =    64,
-#                 name =      "align_magna_stats",
-#     shell:
-#                 """
-#                 samtools stats {input.bam_coordSorted} > {output.stats}
-#                 samtools idxstats {input.bam_coordSorted} > {output.idxstats}
-#                 samtools flagstat {input.bam_coordSorted} > {output.flagstat}
-#                 """
+                # get number of random circles to sample
+                WC=`wc -l {input.ARS_conf}`
+                N_LINES=`echo $WC | cut -d' ' -f1`
+
+                for i in {{1..10}}; do
+                    sort -R {output.cat_tmp} | tail -n ${{N_LINES}} > {params.out}${{i}} 2> {log}
+                done
+                """
+
+rule extract_background_regions:
+    input:
+                ecc_bed = "analysis/ecc_caller/{condition}.merged.bed",
+                chromsizes = config["reference_genome"]+".chromsizes",
+    output:
+                shuf_bed = "analysis/ecc_caller/{condition}.merged.shuf.bed",
+    log:
+                "logs/extract_background_regions.{condition}.log"
+    resources:
+                threads =   1,
+                nodes =     1,
+                mem_gb =    64,
+                name =      "extract_background_regions",
+    conda:
+                "envs/bedtools.yaml",
+    shell:
+                """
+                bedtools shuffle -i {input.ecc_bed} -g {input.chromsizes} -seed 1 > {output.shuf_bed} 2> {log}
+                """
