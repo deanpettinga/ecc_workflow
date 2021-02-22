@@ -66,7 +66,7 @@ rule all:
                 # # plotHeatmap
                 expand("analysis/deeptools/{feature}.heatmap.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
                 # # plotProfile
-                expand("analysis/deeptools/{condition}_vs_background.{feature}.profile.png", condition=["IF","RC"], feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
+                expand("analysis/deeptools/both_vs_background.{feature}.profile.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC","centromere"]),
                 ### MOTIF ANALYSIS ---------------------------------------------
                 # homer
                 expand("analysis/homer/{condition}/knownResults.html", condition=["IF","RC"]),
@@ -515,14 +515,15 @@ rule plotHeatmap:
 rule plotProfile_background:
     # use merged IF/RC regions to compare and contrast with epigenetic marks in heatmap
     input:
-                bed = "analysis/ecc_caller/{condition}.merged.bed",
-                bed_bkg = "analysis/ecc_caller/{condition}.merged.shuf.bed",
-                mark = "analysis/deeptools/{mark}.bw",
+                IF = "analysis/ecc_caller/IF.merged.bed",
+                IF_bkg = "analysis/ecc_caller/IF.merged.shuf.bed",
+                RC = "analysis/ecc_caller/RC.merged.bed",
+                RC_bkg = "analysis/ecc_caller/RC.merged.shuf.bed",
     output:
-                matrix = "analysis/deeptools/{condition}_vs_background.{mark}.mat.gz",
-                profile = "analysis/deeptools/{condition}_vs_background.{mark}.profile.png",
+                matrix = "analysis/deeptools/both_vs_background.{mark}.mat.gz",
+                profile = "analysis/deeptools/both_vs_background.{mark}.profile.png",
     log:
-                "logs/plotProfile_background/{condition}_vs_background.{mark}.plotProfile_background.log"
+                "logs/plotProfile_background/both_vs_background.{mark}.plotProfile_background.log"
     conda:
                 "envs/deeptools.yaml"
     resources:
@@ -535,7 +536,7 @@ rule plotProfile_background:
                 computeMatrix scale-regions \
                 -p {resources.threads} \
                 -S {input.mark} \
-                -R {input.bed} {input.bed_bkg} \
+                -R {input.IF} {input.IF_bkg} {input.RC} {input.RC_bkg} \
                 --beforeRegionStartLength 3000 \
                 --regionBodyLength 5000 \
                 --afterRegionStartLength 3000 \
@@ -546,6 +547,7 @@ rule plotProfile_background:
                 plotProfile \
                 -m {output.matrix} \
                 -out {output.profile} \
+                –regionsLabel IF IF_bkg RC RC_bkg \
                 2>> {log}
                 """
 
