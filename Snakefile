@@ -66,7 +66,7 @@ rule all:
                 # # plotHeatmap
                 expand("analysis/deeptools/{feature}.heatmap.png", feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
                 # # plotProfile
-                expand("analysis/deeptools/{condition}_vs_background.{feature}.profile.png", condition=["IF","RC"], feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"])
+                expand("analysis/deeptools/{condition}_vs_background.{feature}.profile.png", condition=["IF","RC"], feature=["GSM2084216_H3K9me1","GSM2084217_H3K4ac","GSM2084218_H3K27me3","GSM2084219_H3K27ac","GSM2084220_H3K9ac","GSM2084221_H3K9me3","TEs","50bps.GC"]),
                 ### MOTIF ANALYSIS ---------------------------------------------
                 # homer
                 expand("analysis/homer/{condition}/knownResults.html", condition=["IF","RC"]),
